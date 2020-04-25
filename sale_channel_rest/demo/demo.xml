@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_channel.sale_channel_amazon" model="sale.channel">
+        <field name="api_key">your amazon api key</field>
+        <field name="allow_match_on_email" eval="False"/>
+    </record>
+    <record id="sale_channel_ebay" model="sale.channel">
+        <field name="api_key">your ebay api key</field>
+        <field name="allow_match_on_email" eval="True"/>
+    </record>
+    <record id="sale_channel_partner_binding_colleen_amazon" model="sale.channel.partner.binding">
+        <field name="partner_id" ref="base.res_partner_address_28"/>
+        <field name="sale_channel_id" ref="sale_channel.sale_channel_amazon"/>
+        <field name="external_id" ref="id_from_amazon"/>
+    </record>
+    <record id="sale_channel_partner_binding_colleen_ebay" model="sale.channel.partner.binding">
+        <field name="partner_id" ref="base.res_partner_address_28"/>
+        <field name="sale_channel_id" ref="sale_channel.sale_channel_ebay"/>
+        <field name="external_id" ref="id_from_ebay1"/>
+    </record>
+    <record id="sale_channel_partner_binding_willie_ebay" model="sale.channel.partner.binding">
+        <field name="partner_id" ref="base.res_partner_address_1"/>
+        <field name="sale_channel_id" ref="sale_channel.sale_channel_ebay"/>
+        <field name="external_id" ref="id_from_ebay2"/>
+    </record>
+</odoo>
