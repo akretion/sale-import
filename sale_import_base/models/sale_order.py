@@ -63,9 +63,7 @@ class SaleOrder(models.Model):
          to make it usable in create() """
         self._si_process_simple_fields(so_vals)
         self._si_process_m2os(so_vals)
-        # a = deepcopy(so_vals)
         self._si_simulate_onchanges(so_vals)
-        # b = deepcopy(so_vals)
         return so_vals
 
     def _si_process_simple_fields(self, so_vals):

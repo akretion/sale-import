@@ -7,7 +7,7 @@
     "category": "Generic Modules/Sale",
     "author": "Akretion",
     "website": "https://github.com/akretion/sale-import",
-    "depends": ["sale_import_base"],
+    "depends": ["sale_import_base", "sale_exception"],
     "license": "AGPL-3",
     "data": ["data/sale_exceptions.xml"],
     "installable": True,

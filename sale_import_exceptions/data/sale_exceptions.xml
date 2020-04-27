@@ -5,7 +5,7 @@
         <field name="description">Real and calculated tax amounts are different</field>
         <field name="sequence">50</field>
         <field name="model">sale.order</field>
-        <field name="code">failed = not obj.check_tax_consistency()</field>
+        <field name="code">failed = not obj.check_amounts_consistency()</field>
         <field name="active" eval="True"/>
     </record>
 </odoo>

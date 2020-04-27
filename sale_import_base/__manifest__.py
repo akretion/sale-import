@@ -8,7 +8,6 @@
     "author": "Akretion",
     "website": "https://github.com/akretion/sale-import",  # TODO
     "depends": [
-        "sale_exception",
         "queue_job",
         "sale_partner_version",
         "product_code_unique",
