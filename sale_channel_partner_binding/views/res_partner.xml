@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <data>
+        <record id="view_res_partner_channel_binding_form" model="ir.ui.view">
+            <field name="name">view.res.partner.channel.binding.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='property_payment_term_id']" position="after">
+                    <field name="sale_channel_partner_bind_ids"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
