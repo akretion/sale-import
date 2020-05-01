@@ -8,8 +8,8 @@ class SaleChannelPartnerBinding(models.Model):
     _name = "sale.channel.partner.binding"
     _description = "Sale Channel Partner Binding"
 
-    sale_channel_id = fields.Many2one("sale.channel", "Sale Channel")
-    partner_id = fields.Many2one("res.partner", "Contact")
+    sale_channel_id = fields.Many2one("sale.channel", "Sale Channel", required=True)
+    partner_id = fields.Many2one("res.partner", "Contact", required=True)
     external_id = fields.Char(
-        "External ID", help="The user ID from the external sale channel"
+        "External ID", help="The user ID from the external sale channel", required=True
     )
