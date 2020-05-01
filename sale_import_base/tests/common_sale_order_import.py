@@ -9,10 +9,10 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
     @classmethod
     def setUpClass(cls):
         super(SaleImportCase, cls).setUpClass()
-        cls._setup_data()
 
     @classmethod
-    def _setup_data(cls):
+    def setUpExampleImport(cls):
+        cls.setUpClassicProducts()
         cls.partner_thomasjean = cls.env["res.partner"].create(
             {
                 "name": "Thomas Jean",
@@ -64,6 +64,7 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "city": "Lyon",
             "email": "thomasjean@gmail.com",
             "country_code": "FR",
+            "external_id": "AMZN_CUST123",
         }
         cls.addr_shipping_example = {
             "name": "shipping contact name",
@@ -116,23 +117,23 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             # external_id: not required
         }
         cls.line_valid_1 = {
-            "product_code": "FURN_0096",
+            "product_code": "PROD_ORDER",
             "qty": 5,
-            "price_unit": 500.0,
+            "price_unit": 1111.1,
             "description": "Some description",
-            "discount": 0.0,
+            "discount": 10.0,
         }
         cls.line_valid_2 = {
-            "product_code": "E-COM10",
+            "product_code": "PROD_DEL",
             "qty": 2,
-            "price_unit": 200.0,
-            "description": "",
+            "price_unit": 2222.2,
+            # description: missing
             "discount": 0.0,
         }
         cls.line_invalid = {
             "product_code": "DOES NOT EXIST",
-            "qty": 5,
-            "price_unit": 500.0,
+            "qty": "should not happen",
+            "price_unit": "wrong input",
             "description": "",
             "discount": 0.0,
         }
@@ -149,6 +150,7 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "amount_total": dict(),
         }
         cls.invoice_history_example = {"date": "1900-12-30", "number": "IN-123"}
+        cls.sale_channel_ebay = cls.env.ref("sale_channel.sale_channel_ebay")
         cls.sale_order_example = {
             "address_customer": cls.addr_customer_example,
             "address_shipping": cls.addr_shipping_example,
@@ -159,5 +161,5 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "transaction_id": 123,
             "status": "Does not matter",
             "invoice": cls.invoice_history_example,
+            "sale_channel": cls.sale_channel_ebay.name,
         }
-        cls.sale_channel_ebay = cls.ref("sale_channel.sale_channel_ebay")

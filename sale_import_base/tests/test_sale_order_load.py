@@ -9,6 +9,7 @@ from .common_sale_order_import import SaleImportCase
 class TestSaleOrderDatamodel(SaleImportCase):
     def setUp(self):
         super().setUp()
+        self.setUpExampleImport()
 
     def test_basic_syntax_validation(self):
         lines = [self.line_valid_1, self.line_valid_2]
@@ -18,7 +19,7 @@ class TestSaleOrderDatamodel(SaleImportCase):
             "address_invoicing": self.addr_invoicing_minimum,
             "lines": lines,
             "amount": self.amount_valid,
-            "channel_id": self.channel_ebay,
+            "channel_id": self.sale_channel_ebay.name,
         }
         self.env.datamodels["sale.order"].validate(json_import)
 
@@ -37,13 +38,14 @@ class TestSaleOrderDatamodel(SaleImportCase):
     def test_sale_order_created(self):
         json_import = self.sale_order_example
         sale_order = self.env["sale.order"].process_json_import(json_import)
-        self.check_expected_values(sale_order, json_import)
+        self._check_expected_so_values(sale_order, json_import)
+        self._check_binding_created()
 
-    def check_expected_values(self, sale_order, values):
-        self.check_partners_updated(sale_order, values)
-        self.check_onchanges_applied(sale_order, values)
+    def _check_expected_so_values(self, sale_order, values):
+        self._check_so_partners_updated(sale_order, values)
+        self._check_so_onchanges_applied(sale_order, values)
 
-    def check_partners_updated(self, sale_order, values):
+    def _check_so_partners_updated(self, sale_order, values):
         def check_record_vals(record, vals_dict):
             simple_compare = ["name", "street", "street2", "zip", "city"]
             for field in simple_compare:
@@ -85,6 +87,11 @@ class TestSaleOrderDatamodel(SaleImportCase):
         for partner, data_example in record_example_mappings.items():
             check_record_vals(getattr(sale_order, partner), data_example)
 
-    def check_onchanges_applied(self, sale_order, values):
-        # TODO
+    def _check_so_onchanges_applied(self, sale_order, values):
+        # TODO clarify taxes
         pass
+
+    def _check_binding_created(self):
+        binding = self.env["sale.channel.partner.binding"].search([])[-1]
+        self.assertEqual(binding.partner_id.id, self.partner_thomasjean.id)
+        self.assertEqual(binding.sale_channel_id.id, self.sale_channel_ebay.id)
