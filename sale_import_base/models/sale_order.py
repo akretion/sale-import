@@ -47,17 +47,36 @@ class SaleOrder(models.Model):
         new_sale_order._si_finalize(new_sale_order, data)
         return new_sale_order
 
+    # DATAMODEL VALIDATORS
     def _si_validate_datamodel(self, datamodel_instance):
         """ Extend this method to add your validators against the DB """
         self._si_validate_address_customer(datamodel_instance)
+        self._si_validate_product_codes(datamodel_instance)
+        self._si_validate_sale_channel(datamodel_instance)
 
-    def _si_validate_address_customer(self, datamodel_instance):
+    def _si_validate_product_codes(self, datamodel_instance):
         partner = self.env["res.partner"].search(
             [("email", "=", datamodel_instance.address_customer.email)]
         )
         if len(partner.ids) != 1:
             raise ValidationError(_("Could not find one partner"))
 
+    def _si_validate_address_customer(self, datamodel_instance):
+        for line in datamodel_instance.lines:
+            product = self.env["product.product"].search(
+                [("default_code", "=", line.product_code)]
+            )
+            if len(product.ids) != 1:
+                raise ValidationError(_("Could not find one product"))
+
+    def _si_validate_sale_channel(self, datamodel_instance):
+        sale_channel = self.env["sale.channel"].search(
+            [("name", "=", datamodel_instance.sale_channel)]
+        )
+        if len(sale_channel.ids) != 1:
+            raise ValidationError(_("Could not find one product"))
+
+    # DATAMODEL PROCESSORS
     def _si_process_dump(self, so_vals):
         """ Transform values in-place
          to make it usable in create() """
@@ -131,8 +150,9 @@ class SaleOrder(models.Model):
             addr["parent_id"] = partner_id
             res_partner_virtual = res_partner_obj.new(addr)
             # on create res.partner Odoo rewrites address values to be the
-            # same as the parent's, thus we force rewrite to keep our values
-            res_partner_virtual.write(addr)
+            # same as the parent's, thus we force set to our values
+            for k, v in addr.items():
+                setattr(res_partner_virtual, k, v)
             version = res_partner_virtual.get_address_version()
             so_vals[field] = version.id
             del so_vals[vals_key]
@@ -174,7 +194,7 @@ class SaleOrder(models.Model):
         )
         if channel:
             so_vals["sale_channel_id"] = channel.id
-        del so_vals["sale_channel"]
+            del so_vals["sale_channel"]
 
     def _si_simulate_onchanges(self, order):
         """ Drawn from connector_ecommerce module
@@ -260,14 +280,15 @@ class SaleOrder(models.Model):
                 new_values[fieldname] = value
         return new_values
 
+    # FINALIZERS
     def _si_finalize(self, new_sale_order, raw_import_data):
         """ Extend to add final operations """
         self._si_create_sale_channel_binding(new_sale_order, raw_import_data)
 
     def _si_create_sale_channel_binding(self, sale_order, data):
         binding_vals = {
-            "channel_id": sale_order.channel_id.id,
+            "sale_channel_id": sale_order.sale_channel_id.id,
             "partner_id": sale_order.partner_id.id,
-            "external_id": data["customer_address"]["external_id"],
+            "external_id": data["address_customer"]["external_id"],
         }
         self.env["sale.channel.partner.binding"].create(binding_vals)

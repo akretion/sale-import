@@ -9,3 +9,4 @@ class TestSaleImportException(SaleImportCase):
 
     def setUp(self):
         super().setUp()
+        self.setUpExampleImport()
