@@ -54,14 +54,14 @@ class SaleOrder(models.Model):
         self._si_validate_product_codes(datamodel_instance)
         self._si_validate_sale_channel(datamodel_instance)
 
-    def _si_validate_product_codes(self, datamodel_instance):
+    def _si_validate_address_customer(self, datamodel_instance):
         partner = self.env["res.partner"].search(
             [("email", "=", datamodel_instance.address_customer.email)]
         )
         if len(partner.ids) != 1:
             raise ValidationError(_("Could not find one partner"))
 
-    def _si_validate_address_customer(self, datamodel_instance):
+    def _si_validate_product_codes(self, datamodel_instance):
         for line in datamodel_instance.lines:
             product = self.env["product.product"].search(
                 [("default_code", "=", line.product_code)]
