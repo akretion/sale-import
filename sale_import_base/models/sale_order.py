@@ -18,7 +18,6 @@ MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE = [
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    allow_match_on_email = fields.Boolean("Allow customer match on email")  # todo view
     si_amount_untaxed = fields.Float("(technical) Untaxed amount from import")
     si_amount_tax = fields.Float("(technical) Tax amount from import")
     si_amount_total = fields.Float("(technical) Total amount from import")
@@ -191,7 +190,8 @@ class SaleOrder(models.Model):
 
     def _si_process_amount(self, so_vals):
         for k, v in so_vals["amount"].items():
-            so_vals[k] = v
+            si_key = "si_" + k
+            so_vals[si_key] = v
         del so_vals["amount"]
 
     def _si_process_invoice(self, so_vals):

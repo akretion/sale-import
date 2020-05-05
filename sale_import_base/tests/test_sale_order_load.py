@@ -40,7 +40,7 @@ class TestSaleOrderDatamodel(SaleImportCase):
         ):
             self.assertIn(el, result.keys())
 
-    def test_sale_order_import_workflow(self):
+    def test_sale_order_import_workflow(self):  # TODO check discount, (taxes)?
         json_import = self.sale_order_example_vals
         sale_order = self.env["sale.order"].process_json_import(json_import)
         self._check_so_partners_updated(sale_order, json_import)
@@ -96,6 +96,7 @@ class TestSaleOrderDatamodel(SaleImportCase):
         first_line = sale_order.order_line[0]
         second_line = sale_order.order_line[1]
         self.assertEqual(first_line.tax_id, self.tax)
+        self.assertEqual(second_line.tax_id, self.env["account.tax"])
         # check description applied on line
         self.assertEqual(first_line.name, self.line_valid_1["description"])
         expected_desc = (
@@ -109,7 +110,9 @@ class TestSaleOrderDatamodel(SaleImportCase):
         self.assertEqual(binding.sale_channel_id.id, self.sale_channel_ebay.id)
         self.assertEqual(binding.sale_order_id.id, sale_order.id)
 
-    def _check_delivery_carrier_charges_applied(self, sale_order, values):
+    def _check_delivery_carrier_charges_applied(
+        self, sale_order, values
+    ):  # TODO confirm it's ok (fpos ?)
         delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
         self.assertTrue(delivery_line)
         delivery_amount = delivery_line.price_total
@@ -119,7 +122,7 @@ class TestSaleOrderDatamodel(SaleImportCase):
         )
         self.assertEqual(equal_delivery, 0)
 
-    def test_amounts_exception(self):
+    def test_amounts_exception(self):  # TODO not good
         json_import = self.sale_order_example_vals
         json_import["amount"]["amount_total"] += 500.0
         sale_order = self.env["sale.order"].process_json_import(json_import)
