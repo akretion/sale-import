@@ -3,7 +3,6 @@
 <odoo>
     <data>
         <record id="view_sale_order_form_channel" model="ir.ui.view">
-            <field name="name">view.sale.order.form.channel</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
