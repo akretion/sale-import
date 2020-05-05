@@ -17,7 +17,7 @@
         "delivery",
     ],
     "license": "AGPL-3",
-    "data": [],
+    "data": ["data/sale_exception.xml", "views/sale_channel.xml"],
     "installable": True,
     "external_dependencies": {"python": ["marshmallow_objects"]},
 }
