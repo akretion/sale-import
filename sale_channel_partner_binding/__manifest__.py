@@ -13,6 +13,7 @@
         "security/ir.model.access.csv",
         "views/sale_channel.xml",
         "views/res_partner.xml",
+        "views/partner_binding.xml",
     ],
     "demo": ["demo/demo.xml"],
 }

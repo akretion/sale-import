@@ -18,6 +18,7 @@ MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE = [
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    allow_match_on_email = fields.Boolean("Allow customer match on email")  # todo view
     si_amount_untaxed = fields.Float("(technical) Untaxed amount from import")
     si_amount_tax = fields.Float("(technical) Tax amount from import")
     si_amount_total = fields.Float("(technical) Total amount from import")
@@ -53,6 +54,7 @@ class SaleOrder(models.Model):
         self._si_validate_address_customer(datamodel_instance)
         self._si_validate_product_codes(datamodel_instance)
         self._si_validate_sale_channel(datamodel_instance)
+        self._si_validate_delivery_carrier(datamodel_instance)
 
     def _si_validate_address_customer(self, datamodel_instance):
         partner = self.env["res.partner"].search(
@@ -74,7 +76,14 @@ class SaleOrder(models.Model):
             [("name", "=", datamodel_instance.sale_channel)]
         )
         if len(sale_channel.ids) != 1:
-            raise ValidationError(_("Could not find one product"))
+            raise ValidationError(_("Could not find one sale channel"))
+
+    def _si_validate_delivery_carrier(self, datamodel_instance):
+        delivery_carrier = self.env["delivery.carrier"].search(
+            [("name", "=", datamodel_instance.delivery_carrier)]  # TODO that ok ?
+        )
+        if len(delivery_carrier.ids) != 1:
+            raise ValidationError(_("Could not find one delivery carrier"))
 
     # DATAMODEL PROCESSORS
     def _si_process_dump(self, so_vals):
@@ -98,6 +107,7 @@ class SaleOrder(models.Model):
         self._si_process_amount(so_vals)
         self._si_process_invoice(so_vals)
         self._si_process_sale_channel(so_vals)
+        self._si_process_delivery_carrier(so_vals)
 
     def _si_get_partner(self, so_vals):
         email = so_vals.get("address_customer") and so_vals.get("address_customer").get(
@@ -196,6 +206,14 @@ class SaleOrder(models.Model):
             so_vals["sale_channel_id"] = channel.id
             del so_vals["sale_channel"]
 
+    def _si_process_delivery_carrier(self, so_vals):
+        delivery_carrier = self.env["delivery.carrier"].search(
+            [("name", "=", so_vals.get("delivery_carrier"))]
+        )
+        if delivery_carrier:
+            so_vals["carrier_id"] = delivery_carrier.id
+            del so_vals["delivery_carrier"]
+
     def _si_simulate_onchanges(self, order):
         """ Drawn from connector_ecommerce module
         Play the onchange of the sales order and it's lines
@@ -284,11 +302,14 @@ class SaleOrder(models.Model):
     def _si_finalize(self, new_sale_order, raw_import_data):
         """ Extend to add final operations """
         self._si_create_sale_channel_binding(new_sale_order, raw_import_data)
+        new_sale_order.get_delivery_price()
+        new_sale_order.set_delivery_line()
 
     def _si_create_sale_channel_binding(self, sale_order, data):
         binding_vals = {
             "sale_channel_id": sale_order.sale_channel_id.id,
             "partner_id": sale_order.partner_id.id,
             "external_id": data["address_customer"]["external_id"],
+            "sale_order_id": sale_order.id,
         }
-        self.env["sale.channel.partner.binding"].create(binding_vals)
+        self.env["res.partner.binding"].create(binding_vals)

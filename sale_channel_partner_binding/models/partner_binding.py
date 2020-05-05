@@ -5,9 +5,10 @@ from odoo import fields, models
 
 
 class SaleChannelPartnerBinding(models.Model):
-    _name = "sale.channel.partner.binding"
+    _name = "res.partner.binding"
     _description = "Sale Channel Partner Binding"
 
+    sale_order_id = fields.Many2one("sale.order", string="Origin sale order")
     sale_channel_id = fields.Many2one("sale.channel", "Sale Channel", required=True)
     partner_id = fields.Many2one("res.partner", "Contact", required=True)
     external_id = fields.Char(

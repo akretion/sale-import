@@ -7,5 +7,4 @@ from odoo import fields, models
 class SaleChannel(models.Model):
     _inherit = "sale.channel"
 
-    api_key = fields.Char(string="REST Api Key")
-    allow_match_on_email = fields.Boolean("Allow customer match on email")
+    api_key = fields.Many2one(string="REST Api Key")

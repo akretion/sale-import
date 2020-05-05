@@ -19,3 +19,4 @@ class SaleOrderDatamodel(BaseDatamodel):
     status = fields.Str()
     invoice = fields.NestedModel("sale.order.invoice.history")
     sale_channel = fields.Str()
+    delivery_carrier = fields.Str()

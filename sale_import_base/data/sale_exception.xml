@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id ="exc_wrong_total_amount" model="exception.rule">
+        <field name="name">Inconsistent amounts</field>
+        <field name="description">The amount computed in Odoo doesn't match with the imported amount.
+There could be an error due to differences in fiscal positions or the tax calculations themselves.</field>
+        <field name="sequence">50</field>
+        <field name="model">sale.order</field>
+        <field name="code">failed = obj.partner_binding_ids and abs(obj.amount_total - obj.si_amount_total) >= 0.01</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

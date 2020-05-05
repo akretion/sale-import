@@ -13,6 +13,8 @@
         "product_code_unique",
         "datamodel",
         "sale_channel_partner_binding",
+        "sale_exception",
+        "delivery",
     ],
     "license": "AGPL-3",
     "data": [],

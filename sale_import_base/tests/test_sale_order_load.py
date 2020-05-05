@@ -1,7 +1,7 @@
 # Copyright 2020 Akretion
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo.exceptions import ValidationError
+from odoo.tools import float_compare
 
 from .common_sale_order_import import SaleImportCase
 
@@ -9,7 +9,6 @@ from .common_sale_order_import import SaleImportCase
 class TestSaleOrderDatamodel(SaleImportCase):
     def setUp(self):
         super().setUp()
-        self.setUpExampleImport()
 
     def test_basic_syntax_validation(self):
         lines = [self.line_valid_1, self.line_valid_2]
@@ -32,18 +31,23 @@ class TestSaleOrderDatamodel(SaleImportCase):
             "lines": lines,
             "amount": self.amount_valid,
         }
-        with self.assertRaises(ValidationError):  # TODO marshmallow exceptions
-            self.env.datamodels["sale.order"].validate(json_import)
+        result = self.env.datamodels["sale.order"].validate(json_import)
+        for el in (
+            "address_customer",
+            "address_shipping",
+            "address_invoicing",
+            "lines",
+        ):
+            self.assertIn(el, result.keys())
 
-    def test_sale_order_created(self):
-        json_import = self.sale_order_example
+    def test_sale_order_import_workflow(self):
+        json_import = self.sale_order_example_vals
         sale_order = self.env["sale.order"].process_json_import(json_import)
-        self._check_expected_so_values(sale_order, json_import)
-        self._check_binding_created()
-
-    def _check_expected_so_values(self, sale_order, values):
-        self._check_so_partners_updated(sale_order, values)
-        self._check_so_onchanges_applied(sale_order, values)
+        self._check_so_partners_updated(sale_order, json_import)
+        self._check_so_onchanges_applied(sale_order, json_import)
+        self._check_binding_created(sale_order)
+        self._check_delivery_carrier_charges_applied(sale_order, json_import)
+        sale_order.action_confirm()
 
     def _check_so_partners_updated(self, sale_order, values):
         def check_record_vals(record, vals_dict):
@@ -88,10 +92,35 @@ class TestSaleOrderDatamodel(SaleImportCase):
             check_record_vals(getattr(sale_order, partner), data_example)
 
     def _check_so_onchanges_applied(self, sale_order, values):
-        # TODO clarify taxes
-        pass
+        # check tax applied on first line
+        first_line = sale_order.order_line[0]
+        second_line = sale_order.order_line[1]
+        self.assertEqual(first_line.tax_id, self.tax)
+        # check description applied on line
+        self.assertEqual(first_line.name, self.line_valid_1["description"])
+        expected_desc = (
+            "[" + self.product_deliver.default_code + "] " + self.product_deliver.name
+        )
+        self.assertEqual(second_line.name, expected_desc)
 
-    def _check_binding_created(self):
-        binding = self.env["sale.channel.partner.binding"].search([])[-1]
+    def _check_binding_created(self, sale_order):
+        binding = self.env["res.partner.binding"].search([])[-1]
         self.assertEqual(binding.partner_id.id, self.partner_thomasjean.id)
         self.assertEqual(binding.sale_channel_id.id, self.sale_channel_ebay.id)
+        self.assertEqual(binding.sale_order_id.id, sale_order.id)
+
+    def _check_delivery_carrier_charges_applied(self, sale_order, values):
+        delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
+        self.assertTrue(delivery_line)
+        delivery_amount = delivery_line.price_total
+        expected_delivery_amount = 10.0
+        equal_delivery = float_compare(
+            delivery_amount, expected_delivery_amount, precision_digits=2
+        )
+        self.assertEqual(equal_delivery, 0)
+
+    def test_amounts_exception(self):
+        json_import = self.sale_order_example_vals
+        json_import["amount"]["amount_total"] += 500.0
+        sale_order = self.env["sale.order"].process_json_import(json_import)
+        sale_order.action_confirm()
