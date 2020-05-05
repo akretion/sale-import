@@ -21,7 +21,7 @@ class SaleOrder(models.Model):
     def _si_get_partner(self, so_vals):
         sale_channel_id = self.env.context.get("sale_channel")
         external_id = so_vals["address_customer"].get("external_id")
-        binding = self.env["sale.channel.partner.binding"].search(
+        binding = self.env["res.partner.binding"].search(
             [
                 ("partner_id", "=", external_id.id),
                 ("sale_channel_id", "=", sale_channel_id.id),

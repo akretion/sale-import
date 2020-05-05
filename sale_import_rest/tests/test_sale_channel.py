@@ -31,8 +31,14 @@ class TestSaleChannel(TransactionCase):
         self.env["sale.order.line"].create(so_line_vals)
         sale_order.action_confirm()
         sale_order.action_invoice_create()
-        binding = self.env["sale.channel.partner.binding"].search(
+        binding = self.env["res.partner.binding"].search(
             [("partner_id", "=", self.partner.id)]
         )
         self.assertTrue(binding.partner_id == self.partner)
         self.assertTrue(binding.sale_channel_id == self.sale_channel)
+
+    def test_api_key_recognized(self):  # todo
+        pass
+
+    def test_api_key_wrong(self):
+        pass
