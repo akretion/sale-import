@@ -9,10 +9,14 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
     @classmethod
     def setUpClass(cls):
         super(SaleImportCase, cls).setUpClass()
+        cls.setUpClassicProducts()
+        cls.setUpAddresses()
+        cls.setUpLines()
+        cls.setUpImport()
+        cls.setUpTaxesFpos()
 
     @classmethod
-    def setUpExampleImport(cls):
-        cls.setUpClassicProducts()
+    def setUpAddresses(cls):
         cls.partner_thomasjean = cls.env["res.partner"].create(
             {
                 "name": "Thomas Jean",
@@ -116,6 +120,9 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "country_code": "FR",
             # external_id: not required
         }
+
+    @classmethod
+    def setUpLines(cls):
         cls.line_valid_1 = {
             "product_code": "PROD_ORDER",
             "qty": 5,
@@ -137,6 +144,9 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "description": "",
             "discount": 0.0,
         }
+
+    @classmethod
+    def setUpImport(cls):
         cls.amount_valid = {
             # note: this is for syntax check only
             "amount_tax": 2500.0 * 5 * 0.15,
@@ -151,7 +161,7 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
         }
         cls.invoice_history_example = {"date": "1900-12-30", "number": "IN-123"}
         cls.sale_channel_ebay = cls.env.ref("sale_channel.sale_channel_ebay")
-        cls.sale_order_example = {
+        cls.sale_order_example_vals = {
             "address_customer": cls.addr_customer_example,
             "address_shipping": cls.addr_shipping_example,
             "address_invoicing": cls.addr_invoicing_example,
@@ -162,4 +172,29 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "status": "Does not matter",
             "invoice": cls.invoice_history_example,
             "sale_channel": cls.sale_channel_ebay.name,
+            "delivery_carrier": "Normal Delivery Charges",
         }
+
+    @classmethod
+    def setUpTaxesFpos(cls):
+        Tax = cls.env["account.tax"]
+        # Fpos = cls.env["account.fiscal.position"]
+        # FposLine = cls.env["account.fiscal.position.tax"] # TODO
+
+        tax_vals = {
+            "name": "tax 9%",
+            "amount": "9.00",
+            "type_tax_use": "sale",
+            "company_id": cls.env.ref("base.main_company").id,
+        }
+        cls.tax = Tax.create(tax_vals)
+        # fpos_vals = {"name": "fiscal position"} # TODO use that or not ?
+        # cls.fpos = cls.Fpos.create(fpos_vals)
+        # fpos_line_vals = {
+        #     "position_id": cls.fpos.id,
+        #     "tax_src_id": cls.tax.id,
+        #     "tax_dest_id": cls.tax.id,
+        # }
+        # cls.fpos_line = cls.FposLine.create(fpos_line_vals)
+        # cls.partner_thomasjean.fiscal_position_id = cls.fpos
+        cls.product_order.taxes_id = cls.tax
