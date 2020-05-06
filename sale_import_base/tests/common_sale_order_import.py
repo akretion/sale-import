@@ -1,4 +1,3 @@
-# Copyright 2020 Akretion
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 from odoo.addons.datamodel.tests.common import SavepointDatamodelCase

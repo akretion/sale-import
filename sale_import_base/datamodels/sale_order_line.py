@@ -1,8 +1,3 @@
-# Copyright 2020 Akretion
-# from marshmallow_objects import ValidationError, validates
-
-# from odoo import _
-
 from odoo.addons.datamodel import fields
 from odoo.addons.datamodel.datamodels.base import BaseDatamodel
 
