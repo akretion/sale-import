@@ -1,4 +1,3 @@
-# Copyright 2020 Akretion
 from marshmallow_objects import ValidationError, validates
 
 from odoo import _

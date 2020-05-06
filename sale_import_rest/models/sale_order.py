@@ -1,5 +1,3 @@
-# Copyright 2020 Akretion
-
 from odoo import _, models
 from odoo.exceptions import ValidationError
 

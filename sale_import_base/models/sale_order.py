@@ -1,4 +1,3 @@
-# Copyright 2020 Akretion
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
@@ -60,6 +59,7 @@ class SaleOrder(models.Model):
         self._si_validate_product_codes(datamodel_instance)
         self._si_validate_sale_channel(datamodel_instance)
         self._si_validate_currency_code(datamodel_instance)
+        self._si_validate_payment(datamodel_instance)
 
     def _si_validate_address_customer(self, datamodel_instance):
         partner = self.env["res.partner"].search(
@@ -84,6 +84,9 @@ class SaleOrder(models.Model):
             raise ValidationError(_("Could not find one sale channel"))
 
     def _si_validate_currency_code(self, datamodel_instance):
+        pass  # todo
+
+    def _si_validate_payment(self, datamodel_instance):
         pass  # todo
 
     # DATAMODEL PROCESSORS
@@ -304,6 +307,7 @@ class SaleOrder(models.Model):
         self._si_create_sale_channel_binding(new_sale_order, raw_import_data)
         new_sale_order.si_exc_check_amounts_total = True
         new_sale_order.si_exc_check_amounts_untaxed = True
+        self._si_create_payment(raw_import_data)
 
     def _si_create_sale_channel_binding(
         self, sale_order, data
@@ -316,3 +320,6 @@ class SaleOrder(models.Model):
             "sale_order_id": sale_order.id,  # todo remove ?
         }
         self.env["res.partner.binding"].create(binding_vals)
+
+    def _si_create_payment(self, raw_import_data):
+        pass  # todo

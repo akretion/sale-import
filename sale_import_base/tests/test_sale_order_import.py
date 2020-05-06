@@ -1,4 +1,3 @@
-# Copyright 2020 Akretion
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 from odoo.exceptions import ValidationError
@@ -105,3 +104,6 @@ class TestSaleOrderImport(SaleImportCase):
         sale_order = self.env["sale.order"].process_json_import(json_import)
         with self.assertRaises(ValidationError):
             sale_order.action_confirm()
+
+    def test_payment_processed(self):
+        pass
