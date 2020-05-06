@@ -14,14 +14,11 @@ class TestSaleOrderImport(SaleImportCase):
             "price_unit": 10.0,
             "discount": 0.0,
         }
+        json_import = self.sale_order_example_vals
+        self.sale_order = self.env["sale.order"].process_json_import(json_import)
 
     def test_delivery_carrier_charges_applied(self):
-        json_import = self.sale_order_example_vals
-        sale_order = self.env["sale.order"].process_json_import(json_import)
-        self._check_delivery_carrier_charges_applied(sale_order)
-
-    def _check_delivery_carrier_charges_applied(self, sale_order):  # todo fpos
-        delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
+        delivery_line = self.sale_order.order_line.filtered(lambda r: r.is_delivery)
         self.assertTrue(delivery_line)
         delivery_amount = delivery_line.price_total
         expected_delivery_amount = 10.0
