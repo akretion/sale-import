@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='sales_purchases']//group[@name='sale']" position="inside">
-                    <field name="partner_bind_ids" attrs="{'readonly': 1}">
+                    <field name="partner_bind_ids">
                         <tree>
                             <field name="sale_channel_id"/>
                             <field name="external_id"/>
