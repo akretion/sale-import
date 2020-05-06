@@ -1,4 +1,3 @@
-# Copyright 2020 Akretion
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 from odoo.addons.sale.tests.test_sale_common import TestCommonSaleNoChart
@@ -16,8 +15,7 @@ class TestSaleChannel(TestCommonSaleNoChart):
         self.sale_order.order_line.mapped("product_id").write(
             {"invoice_policy": "order"}
         )
-        self.sale_order.action_confirm()
-        generated_invoice_ids = self.sale_order.action_invoice_create()
-        generated_invoices = self.env["account.invoice"].browse(generated_invoice_ids)
-        for invoice in generated_invoices:
-            self.assertTrue(invoice.sale_channel_id.id == self.sale_channel.id)
+        self.sale_order.action_invoice_create()
+        self.assertEqual(
+            self.sale_order.invoice_ids[0].sale_channel_id, self.sale_channel
+        )
