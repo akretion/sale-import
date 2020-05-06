@@ -9,7 +9,6 @@
                     <field name="external_id"/>
                     <field name="sale_channel_id"/>
                     <field name="partner_id"/>
-                    <field name="sale_order_id"/>
                 </tree>
             </field>
         </record>

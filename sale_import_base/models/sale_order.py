@@ -18,6 +18,12 @@ MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE = [
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    si_exc_check_amounts_untaxed = fields.Boolean(
+        "(technical) Check untaxed amounts against imported values"
+    )
+    si_exc_check_amounts_total = fields.Boolean(
+        "(technical) Check total amounts against imported values"
+    )
     si_amount_untaxed = fields.Float("(technical) Untaxed amount from import")
     si_amount_tax = fields.Float("(technical) Tax amount from import")
     si_amount_total = fields.Float("(technical) Total amount from import")
@@ -53,7 +59,7 @@ class SaleOrder(models.Model):
         self._si_validate_address_customer(datamodel_instance)
         self._si_validate_product_codes(datamodel_instance)
         self._si_validate_sale_channel(datamodel_instance)
-        self._si_validate_delivery_carrier(datamodel_instance)
+        self._si_validate_currency_code(datamodel_instance)
 
     def _si_validate_address_customer(self, datamodel_instance):
         partner = self.env["res.partner"].search(
@@ -77,12 +83,8 @@ class SaleOrder(models.Model):
         if len(sale_channel.ids) != 1:
             raise ValidationError(_("Could not find one sale channel"))
 
-    def _si_validate_delivery_carrier(self, datamodel_instance):
-        delivery_carrier = self.env["delivery.carrier"].search(
-            [("name", "=", datamodel_instance.delivery_carrier)]  # TODO that ok ?
-        )
-        if len(delivery_carrier.ids) != 1:
-            raise ValidationError(_("Could not find one delivery carrier"))
+    def _si_validate_currency_code(self, datamodel_instance):
+        pass  # todo
 
     # DATAMODEL PROCESSORS
     def _si_process_dump(self, so_vals):
@@ -106,7 +108,7 @@ class SaleOrder(models.Model):
         self._si_process_amount(so_vals)
         self._si_process_invoice(so_vals)
         self._si_process_sale_channel(so_vals)
-        self._si_process_delivery_carrier(so_vals)
+        self._si_process_currency_code(so_vals)
 
     def _si_get_partner(self, so_vals):
         email = so_vals.get("address_customer") and so_vals.get("address_customer").get(
@@ -178,11 +180,13 @@ class SaleOrder(models.Model):
             qty = line["qty"]
             price_unit = line["price_unit"]
             description = line["description"]
+            discount = line["discount"]
             line_vals_dict = {
                 "product_id": product_id,
                 "product_uom_qty": qty,
                 "price_unit": price_unit,
                 "name": description,
+                "discount": discount,
             }
             line_vals_command = (0, 0, line_vals_dict)
             so_vals["order_line"].append(line_vals_command)
@@ -198,6 +202,10 @@ class SaleOrder(models.Model):
         # TODO actually use that val
         del so_vals["invoice"]
 
+    def _si_process_currency_code(self, so_vals):
+        # TODO actually use that val
+        del so_vals["currency_code"]
+
     def _si_process_sale_channel(self, so_vals):
         channel = self.env["sale.channel"].search(
             [("name", "=", so_vals.get("sale_channel"))]
@@ -205,14 +213,6 @@ class SaleOrder(models.Model):
         if channel:
             so_vals["sale_channel_id"] = channel.id
             del so_vals["sale_channel"]
-
-    def _si_process_delivery_carrier(self, so_vals):
-        delivery_carrier = self.env["delivery.carrier"].search(
-            [("name", "=", so_vals.get("delivery_carrier"))]
-        )
-        if delivery_carrier:
-            so_vals["carrier_id"] = delivery_carrier.id
-            del so_vals["delivery_carrier"]
 
     def _si_simulate_onchanges(self, order):
         """ Drawn from connector_ecommerce module
@@ -302,14 +302,17 @@ class SaleOrder(models.Model):
     def _si_finalize(self, new_sale_order, raw_import_data):
         """ Extend to add final operations """
         self._si_create_sale_channel_binding(new_sale_order, raw_import_data)
-        new_sale_order.get_delivery_price()
-        new_sale_order.set_delivery_line()
+        new_sale_order.si_exc_check_amounts_total = True
+        new_sale_order.si_exc_check_amounts_untaxed = True
 
-    def _si_create_sale_channel_binding(self, sale_order, data):
+    def _si_create_sale_channel_binding(
+        self, sale_order, data
+    ):  # todo on créé un binding à chaque sale order ou on
+        # créé que si ça n'existe pas ?
         binding_vals = {
             "sale_channel_id": sale_order.sale_channel_id.id,
             "partner_id": sale_order.partner_id.id,
             "external_id": data["address_customer"]["external_id"],
-            "sale_order_id": sale_order.id,
+            "sale_order_id": sale_order.id,  # todo remove ?
         }
         self.env["res.partner.binding"].create(binding_vals)

@@ -1,12 +1,12 @@
 # Copyright 2020 Akretion
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo.tools import float_compare
+from odoo.exceptions import ValidationError
 
 from .common_sale_order_import import SaleImportCase
 
 
-class TestSaleOrderDatamodel(SaleImportCase):
+class TestSaleOrderImport(SaleImportCase):
     def setUp(self):
         super().setUp()
 
@@ -40,14 +40,12 @@ class TestSaleOrderDatamodel(SaleImportCase):
         ):
             self.assertIn(el, result.keys())
 
-    def test_sale_order_import_workflow(self):  # TODO check discount, (taxes)?
+    def test_sale_order_import_workflow(self):
         json_import = self.sale_order_example_vals
         sale_order = self.env["sale.order"].process_json_import(json_import)
         self._check_so_partners_updated(sale_order, json_import)
         self._check_so_onchanges_applied(sale_order, json_import)
         self._check_binding_created(sale_order)
-        self._check_delivery_carrier_charges_applied(sale_order, json_import)
-        sale_order.action_confirm()
 
     def _check_so_partners_updated(self, sale_order, values):
         def check_record_vals(record, vals_dict):
@@ -108,22 +106,10 @@ class TestSaleOrderDatamodel(SaleImportCase):
         binding = self.env["res.partner.binding"].search([])[-1]
         self.assertEqual(binding.partner_id.id, self.partner_thomasjean.id)
         self.assertEqual(binding.sale_channel_id.id, self.sale_channel_ebay.id)
-        self.assertEqual(binding.sale_order_id.id, sale_order.id)
-
-    def _check_delivery_carrier_charges_applied(
-        self, sale_order, values
-    ):  # TODO confirm it's ok (fpos ?)
-        delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
-        self.assertTrue(delivery_line)
-        delivery_amount = delivery_line.price_total
-        expected_delivery_amount = 10.0
-        equal_delivery = float_compare(
-            delivery_amount, expected_delivery_amount, precision_digits=2
-        )
-        self.assertEqual(equal_delivery, 0)
 
     def test_amounts_exception(self):  # TODO not good
         json_import = self.sale_order_example_vals
         json_import["amount"]["amount_total"] += 500.0
         sale_order = self.env["sale.order"].process_json_import(json_import)
-        sale_order.action_confirm()
+        with self.assertRaises(ValidationError):
+            sale_order.action_confirm()
