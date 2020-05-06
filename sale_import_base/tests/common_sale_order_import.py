@@ -147,14 +147,22 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
 
     @classmethod
     def setUpImport(cls):
+        amt_untaxed_1 = (
+            cls.line_valid_1["price_unit"]
+            * cls.line_valid_1["qty"]
+            * (1 - cls.line_valid_1["discount"] / 100)
+        )
+        amt_tax_1 = amt_untaxed_1 * 0.09
+        amt_total_1 = amt_untaxed_1 + amt_tax_1
+        amt_untaxed_2 = cls.line_valid_2["price_unit"] * cls.line_valid_2["qty"]
+        amt_tax_2 = amt_untaxed_1 * 0.09
+        amt_total_2 = amt_untaxed_1 + amt_tax_1
         cls.amount_valid = {
-            # note: this is for syntax check only
-            "amount_tax": 2500.0 * 5 * 0.15,
-            "amount_untaxed": 2500.0 * 5,
-            "amount_total": 2500.0 * 5 * 1.15,
+            "amount_tax": amt_tax_1 + amt_tax_2,
+            "amount_untaxed": amt_untaxed_1 + amt_untaxed_2,
+            "amount_total": amt_total_1 + amt_total_2,
         }
         cls.amount_invalid = {
-            # note: this is for syntax check only
             "amount_tax": "this should not",
             "amount_untaxed": "happen",
             "amount_total": dict(),
@@ -172,14 +180,14 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "status": "Does not matter",
             "invoice": cls.invoice_history_example,
             "sale_channel": cls.sale_channel_ebay.name,
-            "delivery_carrier": "Normal Delivery Charges",
+            "currency_code": "EUR",
         }
 
     @classmethod
     def setUpTaxesFpos(cls):
         Tax = cls.env["account.tax"]
         # Fpos = cls.env["account.fiscal.position"]
-        # FposLine = cls.env["account.fiscal.position.tax"] # TODO
+        # FposLine = cls.env["account.fiscal.position.tax"]
 
         tax_vals = {
             "name": "tax 9%",

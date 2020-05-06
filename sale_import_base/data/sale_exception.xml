@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id ="exc_wrong_total_amount" model="exception.rule">
-        <field name="name">Inconsistent amounts</field>
-        <field name="description">The amount computed in Odoo doesn't match with the imported amount.
-There could be an error due to differences in fiscal positions or the tax calculations themselves.</field>
+    <record id="exc_wrong_total_amount" model="exception.rule">
+        <field name="name">Inconsistent total amounts</field>
+        <field name="description">The amount computed in Odoo doesn't match with the imported total amount.
+There is an error related to tax calculations.</field>
         <field name="sequence">50</field>
         <field name="model">sale.order</field>
-        <field name="code">failed = sale.partner_binding_ids and abs(sale.amount_total - sale.si_amount_total) >= 0.01</field>
-        <field name="active" eval="True"/>
+        <field name="code">failed = sale.si_exc_check_amounts_total and abs(sale.amount_total - sale.si_amount_total) >= 0.01</field>
+    </record>
+    <record id="exc_wrong_untaxed_amount" model="exception.rule">
+        <field name="name">Inconsistent untaxed amounts</field>
+        <field name="description">The amount computed in Odoo doesn't match with the imported untaxed amount.
+There is an error related to the amount calculation.</field>
+        <field name="sequence">50</field>
+        <field name="model">sale.order</field>
+        <field name="code">failed = sale.si_exc_check_amounts_untaxed and abs(sale.amount_total - sale.si_amount_total) >= 0.01</field>
     </record>
 </odoo>

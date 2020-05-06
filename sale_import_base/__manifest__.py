@@ -14,10 +14,10 @@
         "datamodel",
         "sale_channel_partner_binding",
         "sale_exception",
-        "delivery",
     ],
     "license": "AGPL-3",
     "data": ["data/sale_exception.xml", "views/sale_channel.xml"],
+    "demo": ["demo/demo.xml"],
     "installable": True,
     "external_dependencies": {"python": ["marshmallow_objects"]},
 }
