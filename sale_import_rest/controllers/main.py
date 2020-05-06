@@ -15,6 +15,7 @@ class SaleImportBaseController(http.Controller):
         )
         if not sale_channel:
             raise ValidationError(_("API key does not map to any sale channel"))
+        sale_order_data["sale_channel"] = sale_channel.name
         job_ids = self.env["sale.order"].batch_process_json_imports(
             sale_order_data, sale_channel=sale_channel
         )

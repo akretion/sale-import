@@ -9,7 +9,7 @@
     "website": "https://github.com/akretion/sale-import",
     "depends": ["sale_import_base", "auth_api_key"],
     "license": "AGPL-3",
-    "data": [],
+    "data": ["views/sale_channel.xml"],
     "demo": ["demo/demo.xml"],
     "installable": True,
 }
