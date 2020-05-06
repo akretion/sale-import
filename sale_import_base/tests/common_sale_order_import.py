@@ -28,37 +28,6 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
                 "country_id": cls.env.ref("base.fr").id,
             }
         )
-        cls.addr_customer_minimum = {
-            "name": "Thomas Jean",
-            "street": "1 rue de xyz",
-            # street2: not required
-            "zip": "69100",
-            "city": "Lyon",
-            "email": "thomasjean@gmail.com",
-            # state_code: not required
-            # "state_code": 69001,
-            "country_code": "FR",
-        }
-        cls.addr_shipping_minimum = {
-            "name": "does not matter",
-            "street": "2 rue de xyz",
-            "zip": "69100",
-            # street2: not required
-            "city": "Lyon",
-            # email: not required
-            # state_code: not required
-            "country_code": "FR",
-        }
-        cls.addr_invoicing_minimum = {
-            "name": "does not matter",
-            "street": "3 rue de xyz",
-            "zip": "69100",
-            # street2: not required
-            "city": "Lyon",
-            # email: not required
-            # state_code: not required
-            "country_code": "FR",
-        }
         cls.addr_customer_example = {
             "name": "Thomas Jean",
             "street": "1 rue de Jean",
@@ -89,36 +58,6 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "email": "whatever@whatever.io",
             # 'state_code': 'CR-SJ',
             "country_code": "FR",
-        }
-        cls.addr_customer_missing_field = {
-            "name": "Thomas Jean",
-            "street": "1 rue de xyz",
-            # street2: not required
-            "city": "Lyon",
-            "email": "thomasjean@gmail.com",
-            # state_code: not required
-            # country_code: required, missing
-            # external_id: not required
-        }
-        cls.addr_shipping_missing_field = {
-            "name": "does not matter",
-            # street: required, missing
-            # street2: not required
-            "city": "Lyon",
-            # email: not required
-            # state_code: not required
-            "country_code": "FR",
-            # external_id: not required
-        }
-        cls.addr_invoicing_missing_field = {
-            # name: required, missing
-            "street": "3 rue de xyz",
-            # street2: not required
-            "city": "Lyon",
-            # email: not required
-            # state_code: not required
-            "country_code": "FR",
-            # external_id: not required
         }
 
     @classmethod

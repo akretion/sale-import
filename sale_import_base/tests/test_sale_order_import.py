@@ -4,6 +4,7 @@
 from odoo.exceptions import ValidationError
 
 from .common_sale_order_import import SaleImportCase
+from copy import deepcopy
 
 
 class TestSaleOrderImport(SaleImportCase):
@@ -12,36 +13,27 @@ class TestSaleOrderImport(SaleImportCase):
 
     def test_basic_syntax_validation(self):
         lines = [self.line_valid_1, self.line_valid_2]
-        json_import = {
-            "address_customer": self.addr_customer_minimum,
-            "address_shipping": self.addr_shipping_minimum,
-            "address_invoicing": self.addr_invoicing_minimum,
-            "lines": lines,
-            "amount": self.amount_valid,
-            "channel_id": self.sale_channel_ebay.name,
-        }
-        self.env.datamodels["sale.order"].validate(json_import)
+        json_import = self.sale_order_example_vals
+        validation_errors = self.env.datamodels["sale.order"].validate(json_import)
+        self.assertFalse(validation_errors)
 
     def test_basic_syntax_validation_errors(self):
-        lines = [self.line_invalid]
-        json_import = {
-            "address_customer": self.addr_customer_missing_field,
-            "address_shipping": self.addr_shipping_missing_field,
-            "address_invoicing": self.addr_invoicing_missing_field,
-            "lines": lines,
-            "amount": self.amount_valid,
-        }
-        result = self.env.datamodels["sale.order"].validate(json_import)
+        json_import = deepcopy(self.sale_order_example_vals)
+        del json_import["address_customer"]["street"]
+        del json_import["address_invoicing"]["zip"]
+        del json_import["address_shipping"]["country_code"]
+        json_import["lines"][0] = self.line_invalid
+        validation_errors = self.env.datamodels["sale.order"].validate(json_import)
         for el in (
             "address_customer",
             "address_shipping",
             "address_invoicing",
             "lines",
         ):
-            self.assertIn(el, result.keys())
+            self.assertIn(el, validation_errors.keys())
 
     def test_sale_order_import_workflow(self):
-        json_import = self.sale_order_example_vals
+        json_import = deepcopy(self.sale_order_example_vals)
         sale_order = self.env["sale.order"].process_json_import(json_import)
         self._check_so_partners_updated(sale_order, json_import)
         self._check_so_onchanges_applied(sale_order, json_import)
@@ -108,7 +100,7 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(binding.sale_channel_id.id, self.sale_channel_ebay.id)
 
     def test_amounts_exception(self):  # TODO not good
-        json_import = self.sale_order_example_vals
+        json_import = deepcopy(self.sale_order_example_vals)
         json_import["amount"]["amount_total"] += 500.0
         sale_order = self.env["sale.order"].process_json_import(json_import)
         with self.assertRaises(ValidationError):
