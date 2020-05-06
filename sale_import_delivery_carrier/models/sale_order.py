@@ -1,4 +1,3 @@
-# Copyright 2020 Akretion
 from odoo import models
 
 

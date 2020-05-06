@@ -1,5 +1,3 @@
-# Copyright 2020 Akretion
-
 from odoo.addons.datamodel import fields
 from odoo.addons.datamodel.datamodels.base import BaseDatamodel
 
