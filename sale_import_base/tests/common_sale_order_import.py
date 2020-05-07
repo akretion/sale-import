@@ -12,7 +12,8 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
         cls.setUpAddresses()
         cls.setUpLines()
         cls.setUpImport()
-        cls.setUpTaxesFpos()
+        cls.setUpTaxes()
+        cls.setUpFpos()
 
     @classmethod
     def setUpAddresses(cls):
@@ -36,7 +37,7 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "city": "Lyon",
             "email": "thomasjean@gmail.com",
             "country_code": "FR",
-            "external_id": "AMZN_CUST123",
+            "external_id": "EBAY_CUST123",
         }
         cls.addr_shipping_example = {
             "name": "shipping contact name",
@@ -122,11 +123,8 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
         }
 
     @classmethod
-    def setUpTaxesFpos(cls):
+    def setUpTaxes(cls):
         Tax = cls.env["account.tax"]
-        # Fpos = cls.env["account.fiscal.position"]
-        # FposLine = cls.env["account.fiscal.position.tax"]
-
         tax_vals = {
             "name": "tax 9%",
             "amount": "9.00",
@@ -134,13 +132,46 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "company_id": cls.env.ref("base.main_company").id,
         }
         cls.tax = Tax.create(tax_vals)
-        # fpos_vals = {"name": "fiscal position"} # TODO use that or not ?
-        # cls.fpos = cls.Fpos.create(fpos_vals)
-        # fpos_line_vals = {
-        #     "position_id": cls.fpos.id,
-        #     "tax_src_id": cls.tax.id,
-        #     "tax_dest_id": cls.tax.id,
-        # }
-        # cls.fpos_line = cls.FposLine.create(fpos_line_vals)
-        # cls.partner_thomasjean.fiscal_position_id = cls.fpos
         cls.product_order.taxes_id = cls.tax
+
+    @classmethod
+    def setUpFpos(cls):
+        """ CH: taxes, DE: no taxes """
+        Tax = cls.env["account.tax"]
+        Fpos = cls.env["account.fiscal.position"]
+        FposLine = cls.env["account.fiscal.position.tax"]
+
+        # CH
+        fpos_vals_swiss = {
+            "name": "Swiss Fiscal Position",
+            "country_id": cls.env.ref("base.ch").id,
+            "zip_from": 0,
+            "zip_to": 0,
+            "auto_apply": True,
+        }
+        cls.fpos_swiss = Fpos.create(fpos_vals_swiss)
+        tax_vals_swiss = {
+            "name": "Tax Swiss",
+            "amount": "15.00",
+            "type_tax_use": "sale",
+            "company_id": cls.env.ref("base.main_company").id,
+        }
+        cls.tax_swiss = Tax.create(tax_vals_swiss)
+        fpos_line_vals = {
+            "position_id": cls.fpos_swiss.id,
+            "tax_src_id": cls.tax.id,
+            "tax_dest_id": cls.tax_swiss.id,
+        }
+        FposLine.create(fpos_line_vals)
+
+        # DE
+        fpos_vals_de = {
+            "name": "German Fiscal Position",
+            "country_id": cls.env.ref("base.de").id,
+            "zip_from": 0,
+            "zip_to": 0,
+            "auto_apply": True,
+        }
+        cls.fpos_de = Fpos.create(fpos_vals_de)
+        fpos_line_vals = {"position_id": cls.fpos_de.id, "tax_src_id": cls.tax.id}
+        FposLine.create(fpos_line_vals)

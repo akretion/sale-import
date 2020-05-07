@@ -9,7 +9,6 @@ MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE = [
     "street2",
     "zip",
     "city",
-    "external_id",
     "email",
 ]
 
@@ -43,6 +42,9 @@ class SaleOrder(models.Model):
 
     @job
     def process_json_import(self, data, **kwargs):
+        errors = self.env.datamodels["sale.order"].validate(data)
+        if errors:
+            raise ValidationError(_("Import could not be validated: %s" % errors))
         so_datamodel = self.env.datamodels["sale.order"].load(data)
         # validation and value processing: we could extend datamodel with the same idea
         self._si_validate_datamodel(so_datamodel)
@@ -55,18 +57,18 @@ class SaleOrder(models.Model):
     # DATAMODEL VALIDATORS
     def _si_validate_datamodel(self, datamodel_instance):
         """ Extend this method to add your validators against the DB """
-        self._si_validate_address_customer(datamodel_instance)
+        # self._si_validate_address_customer(datamodel_instance)
         self._si_validate_product_codes(datamodel_instance)
         self._si_validate_sale_channel(datamodel_instance)
         self._si_validate_currency_code(datamodel_instance)
         self._si_validate_payment(datamodel_instance)
 
-    def _si_validate_address_customer(self, datamodel_instance):
-        partner = self.env["res.partner"].search(
-            [("email", "=", datamodel_instance.address_customer.email)]
-        )
-        if len(partner.ids) != 1:
-            raise ValidationError(_("Could not find one partner"))
+    # def _si_validate_address_customer(self, datamodel_instance):
+    #     partner = self.env["res.partner"].search(
+    #         [("email", "=", datamodel_instance.address_customer.email)]
+    #     )
+    #     if len(partner.ids) != 1:
+    #         raise ValidationError(_("Could not find one partner"))
 
     def _si_validate_product_codes(self, datamodel_instance):
         for line in datamodel_instance.lines:
@@ -105,7 +107,8 @@ class SaleOrder(models.Model):
         del so_vals["status"]
 
     def _si_process_m2os(self, so_vals):
-        partner_id = self._si_get_partner(so_vals)
+        channel_id = self._si_get_channel(so_vals)
+        partner_id = self._si_get_partner(so_vals, channel_id)
         self._si_process_addresses(partner_id, so_vals)
         self._si_process_lines(so_vals)
         self._si_process_amount(so_vals)
@@ -113,13 +116,39 @@ class SaleOrder(models.Model):
         self._si_process_sale_channel(so_vals)
         self._si_process_currency_code(so_vals)
 
-    def _si_get_partner(self, so_vals):
-        email = so_vals.get("address_customer") and so_vals.get("address_customer").get(
-            "email"
+    def _si_get_channel(self, so_vals):
+        sale_channel = self.env["sale.channel"].search(
+            [("name", "=", so_vals["sale_channel"])]
         )
-        partner = self.env["res.partner"].search([("email", "=", email)])
-        if not partner:
-            raise ValidationError(_("No customer found"))
+        return sale_channel
+
+    def _si_get_partner(self, so_vals, sale_channel):
+        external_id = so_vals["address_customer"].get("external_id")
+        binding = self.env["res.partner.binding"].search(
+            [
+                ("external_id", "=", external_id),
+                ("sale_channel_id", "=", sale_channel.id),
+            ]
+        )
+        if binding:
+            return binding.partner_id
+        if sale_channel.allow_match_on_email:
+            partner = self.env["res.partner"].search(
+                [("email", "=", so_vals["address_customer"]["email"])]
+            )
+            if partner:
+                return partner
+        return self._si_create_partner(so_vals)
+
+    def _si_create_partner(self, so_vals):
+        partner_vals = dict()
+        for field in MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE:
+            partner_vals[field] = so_vals["address_customer"][field]
+        country = self.env["res.country"].search(
+            [("code", "=", so_vals["address_customer"]["country_code"])]
+        )
+        partner_vals["country_id"] = country.id
+        partner = self.env["res.partner"].create(partner_vals)
         return partner
 
     def _si_process_addresses(self, partner_id, so_vals):
@@ -304,7 +333,8 @@ class SaleOrder(models.Model):
     # FINALIZERS
     def _si_finalize(self, new_sale_order, raw_import_data):
         """ Extend to add final operations """
-        self._si_create_sale_channel_binding(new_sale_order, raw_import_data)
+        if raw_import_data["address_customer"].get("external_id"):
+            self._si_create_sale_channel_binding(new_sale_order, raw_import_data)
         new_sale_order.si_exc_check_amounts_total = True
         new_sale_order.si_exc_check_amounts_untaxed = True
         self._si_create_payment(raw_import_data)
@@ -317,7 +347,6 @@ class SaleOrder(models.Model):
             "sale_channel_id": sale_order.sale_channel_id.id,
             "partner_id": sale_order.partner_id.id,
             "external_id": data["address_customer"]["external_id"],
-            "sale_order_id": sale_order.id,  # todo remove ?
         }
         self.env["res.partner.binding"].create(binding_vals)
 

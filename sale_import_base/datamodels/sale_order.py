@@ -15,7 +15,7 @@ class SaleOrderDatamodel(BaseDatamodel):
     payment_mode = fields.Str()
     transaction_id = fields.Integer()
     status = fields.Str()
-    invoice = fields.NestedModel("sale.order.invoice.history")
+    invoice = fields.NestedModel("sale.order.invoice")
     sale_channel = fields.Str()
     delivery_carrier = fields.NestedModel("delivery.carrier")
     currency_code = fields.Str(required=True)
