@@ -124,12 +124,7 @@ class SaleOrder(models.Model):
 
     def _si_get_partner(self, so_vals, sale_channel):
         external_id = so_vals["address_customer"].get("external_id")
-        binding = self.env["res.partner.binding"].search(
-            [
-                ("external_id", "=", external_id),
-                ("sale_channel_id", "=", sale_channel.id),
-            ]
-        )
+        binding = self.helper_find_binding(sale_channel, external_id)
         if binding:
             return binding.partner_id
         if sale_channel.allow_match_on_email:
@@ -154,16 +149,18 @@ class SaleOrder(models.Model):
     def _si_process_addresses(self, partner_id, so_vals):
         # customer itself
         vals_addr_customer = so_vals["address_customer"]
-        partner_id.state_id = (
+        new_state = (
             self.env["res.country.state"]
             .search([("code", "=", vals_addr_customer["state_code"])])
             .id
         )
-        partner_id.country_id = (
+        partner_id.state_id = new_state
+        new_country = (
             self.env["res.country"]
             .search([("code", "=", vals_addr_customer["country_code"])])
             .id
         )
+        partner_id.country_id = new_country
         for field in MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE:
             new_val = vals_addr_customer.get(field)
             if new_val:
@@ -176,12 +173,13 @@ class SaleOrder(models.Model):
         vals_addr_invoicing = so_vals["address_invoicing"]
         vals_addr_shipping = so_vals["address_shipping"]
         for address_field in (
-            (vals_addr_shipping, "partner_shipping_id", "address_shipping"),
-            (vals_addr_invoicing, "partner_invoice_id", "address_invoicing"),
+            (vals_addr_shipping, "partner_shipping_id", "address_shipping", "delivery"),
+            (vals_addr_invoicing, "partner_invoice_id", "address_invoicing", "invoice"),
         ):
             addr = address_field[0]
             field = address_field[1]
             vals_key = address_field[2]
+            type = address_field[3]
             addr["state_id"] = self.env["res.country.state"].search(
                 [("code", "=", addr["state_code"])]
             )
@@ -191,12 +189,14 @@ class SaleOrder(models.Model):
             )
             del addr["country_code"]
             addr["parent_id"] = partner_id
+            addr["type"] = type
             res_partner_virtual = res_partner_obj.new(addr)
             # on create res.partner Odoo rewrites address values to be the
             # same as the parent's, thus we force set to our values
             for k, v in addr.items():
                 setattr(res_partner_virtual, k, v)
             version = res_partner_virtual.get_address_version()
+            version.active = True
             so_vals[field] = version.id
             del so_vals[vals_key]
 
@@ -334,21 +334,31 @@ class SaleOrder(models.Model):
     def _si_finalize(self, new_sale_order, raw_import_data):
         """ Extend to add final operations """
         if raw_import_data["address_customer"].get("external_id"):
-            self._si_create_sale_channel_binding(new_sale_order, raw_import_data)
+            self._si_sync_binding(new_sale_order, raw_import_data)
         new_sale_order.si_exc_check_amounts_total = True
         new_sale_order.si_exc_check_amounts_untaxed = True
         self._si_create_payment(raw_import_data)
 
-    def _si_create_sale_channel_binding(
-        self, sale_order, data
-    ):  # todo on créé un binding à chaque sale order ou on
-        # créé que si ça n'existe pas ?
-        binding_vals = {
-            "sale_channel_id": sale_order.sale_channel_id.id,
-            "partner_id": sale_order.partner_id.id,
-            "external_id": data["address_customer"]["external_id"],
-        }
-        self.env["res.partner.binding"].create(binding_vals)
+    def _si_sync_binding(self, sale_order, data):
+        existing_binding = self.helper_find_binding(
+            sale_order.sale_channel_id, data["address_customer"]["external_id"]
+        )
+        if not existing_binding:
+            binding_vals = {
+                "sale_channel_id": sale_order.sale_channel_id.id,
+                "partner_id": sale_order.partner_id.id,
+                "external_id": data["address_customer"]["external_id"],
+            }
+            self.env["res.partner.binding"].create(binding_vals)
 
     def _si_create_payment(self, raw_import_data):
         pass  # todo
+
+    def helper_find_binding(self, sale_channel, external_id):
+        binding = self.env["res.partner.binding"].search(
+            [
+                ("external_id", "=", external_id),
+                ("sale_channel_id", "=", sale_channel.id),
+            ]
+        )
+        return binding

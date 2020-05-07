@@ -121,6 +121,12 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "sale_channel": cls.sale_channel_ebay.name,
             "currency_code": "EUR",
         }
+        binding_vals = {
+            "sale_channel_id": cls.sale_channel_ebay.id,
+            "partner_id": cls.partner_thomasjean.id,
+            "external_id": "EBAY_CUST123",
+        }
+        cls.env["res.partner.binding"].create(binding_vals)
 
     @classmethod
     def setUpTaxes(cls):
