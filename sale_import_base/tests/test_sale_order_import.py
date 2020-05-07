@@ -52,9 +52,9 @@ class TestSaleOrderImport(SaleImportCase):
             "country_code": "DE",
         }
         self.env["sale.order"].process_json_import(json_import)
-        customer = self.env["res.partner"].search([], order="id desc")[-3]
-        invoicing = self.env["res.partner"].search([], order="id desc")[-2]
-        shipping = self.env["res.partner"].search([], order="id desc")[-1]
+        customer = self.env["res.partner"].search([], order="id desc")[2]
+        shipping = self.env["res.partner"].search([], order="id desc")[1]
+        invoicing = self.env["res.partner"].search([], order="id desc")[0]
         self.assertEqual(customer.street, "1")
         self.assertEqual(invoicing.street, "2")
         self.assertEqual(shipping.street, "3")
@@ -78,12 +78,17 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(new_sale_order.partner_id, self.partner_thomasjean)
 
     def test_import_existing_partner_match_email_not_allowed(self):
-        """ DISCUSSION this is the same as test_create_partner """
+        """ DISCUSSION on en revient à créér un nouveau partner
+        1. pas match sur external_id -> 2. pas match sur email -> create. Mais
+        on risque d'avoir des conflits avec des partner dont l'email existe déjà"""
         json_import = deepcopy(self.sale_order_example_vals)
         del json_import["address_customer"]["external_id"]
-        self.sale_channel_ebay.allow_match_on_email = False
         new_sale_order = self.env["sale.order"].process_json_import(json_import)
-        self.assertEqual(new_sale_order.partner_id, self.partner_thomasjean)
+        for field in ("name", "street", "email", "city"):
+            self.assertEqual(
+                getattr(new_sale_order.partner_id, field),
+                self.addr_customer_example[field],
+            )
 
     def test_product_missing(self):
         """ Test product code validation effectively blocks the job """
