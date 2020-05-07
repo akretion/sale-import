@@ -1,109 +1,179 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+from copy import deepcopy
+
 from odoo.exceptions import ValidationError
 
 from .common_sale_order_import import SaleImportCase
-from copy import deepcopy
 
 
 class TestSaleOrderImport(SaleImportCase):
     def setUp(self):
         super().setUp()
 
-    def test_basic_syntax_validation(self):
-        lines = [self.line_valid_1, self.line_valid_2]
-        json_import = self.sale_order_example_vals
-        validation_errors = self.env.datamodels["sale.order"].validate(json_import)
-        self.assertFalse(validation_errors)
-
-    def test_basic_syntax_validation_errors(self):
+    def test_invalid_json(self):
+        """ An invalid input will stop the job """
         json_import = deepcopy(self.sale_order_example_vals)
         del json_import["address_customer"]["street"]
         del json_import["address_invoicing"]["zip"]
         del json_import["address_shipping"]["country_code"]
         json_import["lines"][0] = self.line_invalid
-        validation_errors = self.env.datamodels["sale.order"].validate(json_import)
-        for el in (
-            "address_customer",
-            "address_shipping",
-            "address_invoicing",
-            "lines",
-        ):
-            self.assertIn(el, validation_errors.keys())
+        with self.assertRaises(ValidationError):
+            self.env["sale.order"].process_json_import(json_import)
 
-    def test_sale_order_import_workflow(self):
+    def test_create_partner(self):
+        """ If we can't match a partner on 1. external id
+        or 2. email (optional), create a new one. """
         json_import = deepcopy(self.sale_order_example_vals)
-        sale_order = self.env["sale.order"].process_json_import(json_import)
-        self._check_so_partners_updated(sale_order, json_import)
-        self._check_so_onchanges_applied(sale_order, json_import)
-        self._check_binding_created(sale_order)
-
-    def _check_so_partners_updated(self, sale_order, values):
-        def check_record_vals(record, vals_dict):
-            simple_compare = ["name", "street", "street2", "zip", "city"]
-            for field in simple_compare:
-                self.assertEqual(getattr(record, field), vals_dict.get(field))
-            m2o_mapping = {
-                "state_id": ("code", "state_code", "res.country.state"),
-                "country_id": ("code", "country_code", "res.country"),
-            }
-            for field, v in m2o_mapping.items():
-                so_m2o_val = getattr(record, field).id
-                expected_value_search_param = v[0]
-                expected_value_search_value = vals_dict.get(v[1])
-                model = v[2]
-                if not expected_value_search_value:
-                    continue
-                expected_value = (
-                    self.env[model]
-                    .search(
-                        [
-                            (
-                                expected_value_search_param,
-                                "=",
-                                expected_value_search_value,
-                            )
-                        ]
-                    )
-                    .id
-                )
-                if so_m2o_val:
-                    self.assertEqual(so_m2o_val, expected_value)
-                else:
-                    self.assertFalse(expected_value)
-
-        record_example_mappings = {
-            "partner_id": values["address_customer"],
-            "partner_shipping_id": values["address_shipping"],
-            "partner_invoice_id": values["address_invoicing"],
+        json_import["address_customer"] = {
+            "name": "Nicolas Cage",
+            "street": "1",
+            "street2": "bis",
+            "zip": "22121",
+            "city": "New Orleans",
+            "email": "nicolas.cage@aol.com",
+            "country_code": "US",
+            "external_id": "AMZN_NICCAGE",
         }
-        for partner, data_example in record_example_mappings.items():
-            check_record_vals(getattr(sale_order, partner), data_example)
+        json_import["address_invoicing"] = {
+            "name": "Nicolas Cage",
+            "street": "2",
+            "street2": "bis",
+            "zip": "22121",
+            "city": "Somerset",
+            "country_code": "GB",
+        }
+        json_import["address_shipping"] = {
+            "name": "Nicolas Cage",
+            "street": "3",
+            "street2": "bis",
+            "zip": "22121",
+            "city": "Oberpfaltz",
+            "country_code": "DE",
+        }
+        self.env["sale.order"].process_json_import(json_import)
+        customer = self.env["res.partner"].search([], order="id desc")[-3]
+        invoicing = self.env["res.partner"].search([], order="id desc")[-2]
+        shipping = self.env["res.partner"].search([], order="id desc")[-1]
+        self.assertEqual(customer.street, "1")
+        self.assertEqual(invoicing.street, "2")
+        self.assertEqual(shipping.street, "3")
+        self.assertEqual(invoicing.parent_id, customer)
+        self.assertEqual(shipping.parent_id, customer)
 
-    def _check_so_onchanges_applied(self, sale_order, values):
-        # check tax applied on first line
-        first_line = sale_order.order_line[0]
-        second_line = sale_order.order_line[1]
-        self.assertEqual(first_line.tax_id, self.tax)
-        self.assertEqual(second_line.tax_id, self.env["account.tax"])
-        # check description applied on line
-        self.assertEqual(first_line.name, self.line_valid_1["description"])
+    def test_import_existing_partner_match_external_id(self):
+        """ During import, if a partner is matched, his
+         address is updated """
+        json_import = deepcopy(self.sale_order_example_vals)
+        del json_import["address_customer"]["email"]
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.partner_id, self.partner_thomasjean)
+
+    def test_import_existing_partner_match_email(self):
+        """ If sale channel allows it and there is no match
+        on external_id, we can match partner on email """
+        json_import = deepcopy(self.sale_order_example_vals)
+        del json_import["address_customer"]["external_id"]
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.partner_id, self.partner_thomasjean)
+
+    def test_import_existing_partner_match_email_not_allowed(self):
+        """ DISCUSSION this is the same as test_create_partner """
+        json_import = deepcopy(self.sale_order_example_vals)
+        del json_import["address_customer"]["external_id"]
+        self.sale_channel_ebay.allow_match_on_email = False
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.partner_id, self.partner_thomasjean)
+
+    def test_product_missing(self):
+        """ Test product code validation effectively blocks the job """
+        json_import = deepcopy(self.sale_order_example_vals)
+        for line in json_import["lines"]:
+            line["product_code"] = "doesn't exist"
+        with self.assertRaises(ValidationError):
+            self.env["sale.order"].process_json_import(json_import)
+
+    def test_product_search(self):
+        """ Check we get the right product match on product code"""
+        json_import = deepcopy(self.sale_order_example_vals)
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.order_line[0].product_id, self.product_order)
+        self.assertEqual(new_sale_order.order_line[1].product_id, self.product_deliver)
+
+    def test_wrong_total_amount(self):
+        """ Test the sale.exception works as intended """
+        json_import = deepcopy(self.sale_order_example_vals)
+        json_import["amount"]["amount_total"] += 500.0
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        with self.assertRaises(ValidationError):
+            new_sale_order._check_exception()
+
+    def test_wrong_total_amount_tax(self):
+        """ Test the sale.exception works as intended """
+        json_import = deepcopy(self.sale_order_example_vals)
+        json_import["amount"]["amount_tax"] += 500.0
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        with self.assertRaises(ValidationError):
+            new_sale_order._check_exception()
+
+    def test_order_country_with_tax(self):
+        """ Test fiscal position is applied correctly
+        in case the destination country has tax """
+        json_import = deepcopy(self.sale_order_example_vals)
+        json_import["address_shipping"]["country_code"] = "CH"
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.order_line[0].tax_id, self.tax_swiss)
+
+    def test_order_country_without_tax(self):
+        """ Test fiscal position is applied correctly
+        in case the destination country has no tax """
+        json_import = deepcopy(self.sale_order_example_vals)
+        json_import["address_shipping"]["country_code"] = "DE"
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.order_line[0].tax_id, self.env["account.tax"])
+
+    ### DISCUSSION Tests rajoutés
+    def test_import_existing_partner_update_addresses(self):
+        """ During import, if a partner is matched, his
+         address is updated """
+        json_import = deepcopy(self.sale_order_example_vals)
+        self.env["sale.order"].process_json_import(json_import)
+        json_import["address_customer"]["street"] = "new val customer"
+        json_import["address_invoicing"]["street"] = "new val invoicing"
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.partner_id.street, "new val customer")
+        self.assertEqual(new_sale_order.partner_invoice_id.street, "new val invoicing")
+        self.assertEqual(new_sale_order.partner_shipping_id.street, "2 rue de shipping")
+
+    def test_order_line_description(self):
+        """ Test that a description is taken into account, or
+        default description is generated if none is provided """
+        json_import = deepcopy(self.sale_order_example_vals)
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(
+            new_sale_order.order_line[0].name, json_import["lines"][0]["description"]
+        )
         expected_desc = (
             "[" + self.product_deliver.default_code + "] " + self.product_deliver.name
         )
-        self.assertEqual(second_line.name, expected_desc)
+        self.assertEqual(new_sale_order.order_line[1].name, expected_desc)
 
-    def _check_binding_created(self, sale_order):
-        binding = self.env["res.partner.binding"].search([])[-1]
-        self.assertEqual(binding.partner_id.id, self.partner_thomasjean.id)
-        self.assertEqual(binding.sale_channel_id.id, self.sale_channel_ebay.id)
-
-    def test_amounts_exception(self):  # TODO not good
+    def test_partner_binding(self):
+        """ Test that a binding is created whenever a customer
+        is matched or created """
         json_import = deepcopy(self.sale_order_example_vals)
-        json_import["amount"]["amount_total"] += 500.0
-        sale_order = self.env["sale.order"].process_json_import(json_import)
-        with self.assertRaises(ValidationError):
-            sale_order.action_confirm()
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        binding = self.env["res.partner.binding"].search([])[-1]
+        self.assertEqual(binding.sale_channel_id, self.sale_channel_ebay)
+        self.assertEqual(binding.partner_id, self.partner_thomasjean)
+        self.assertEqual(
+            binding.external_id, json_import["address_customer"]["external_id"]
+        )
 
-    def test_payment_processed(self):
+    def test_currency_code(self):
+        """ DISCUSSION """
+        pass
+
+    def test_payment_xyz(self):
+        """ DISCUSSION"""
         pass
