@@ -97,7 +97,8 @@ class SaleOrder(models.Model):
          to make it usable in create() """
         self._si_process_simple_fields(so_vals)
         self._si_process_m2os(so_vals)
-        self._si_simulate_onchanges(so_vals)
+        # todo clean
+        so_vals = self._si_simulate_onchanges(so_vals)
         return so_vals
 
     def _si_process_simple_fields(self, so_vals):
@@ -247,7 +248,8 @@ class SaleOrder(models.Model):
             del so_vals["sale_channel"]
 
     def _si_simulate_onchanges(self, order):
-        """ Drawn from connector_ecommerce module
+        """ Drawn from connector_ecommerce module with modifications:
+        onchange fields, some syntax
         Play the onchange of the sales order and it's lines
         :param order: sales order values
         :type: dict
@@ -261,6 +263,7 @@ class SaleOrder(models.Model):
             "partner_shipping_id",
             "payment_mode_id",
             "workflow_process_id",
+            "fiscal_position_id",
         ]
 
         line_onchange_fields = ["product_id"]
@@ -306,11 +309,10 @@ class SaleOrder(models.Model):
         new_values = {}
         for field in onchange_fields:
             onchange_values = new_record.onchange(all_values, field, onchange_specs)
-            new_values.update(
-                self._si_simulate_onchanges_get_new_values(
-                    values, onchange_values, model=model._name
-                )
+            new_values_diff = self._si_simulate_onchanges_get_new_values(
+                values, onchange_values, model=model._name
             )
+            new_values.update(new_values_diff)
             all_values.update(new_values)
 
         res = {f: v for f, v in all_values.items() if f in values or f in new_values}
