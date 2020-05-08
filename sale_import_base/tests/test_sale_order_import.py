@@ -124,9 +124,12 @@ class TestSaleOrderImport(SaleImportCase):
     def test_order_country_with_tax(self):
         """ Test fiscal position is applied correctly
         in case the destination country has tax """
+        # TODO applying onchanges doesn't give an accessibel sale_order_id to the
+        # sale.order.lines, thus no fp -> no tax change
         json_import = deepcopy(self.sale_order_example_vals)
         json_import["address_shipping"]["country_code"] = "CH"
         new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.fiscal_position_id, self.fpos_swiss)
         self.assertEqual(new_sale_order.order_line[0].tax_id, self.tax_swiss)
 
     def test_order_country_without_tax(self):
@@ -135,6 +138,7 @@ class TestSaleOrderImport(SaleImportCase):
         json_import = deepcopy(self.sale_order_example_vals)
         json_import["address_shipping"]["country_code"] = "DE"
         new_sale_order = self.env["sale.order"].process_json_import(json_import)
+        self.assertEqual(new_sale_order.fiscal_position_id, self.fpos_de)
         self.assertEqual(new_sale_order.order_line[0].tax_id, self.env["account.tax"])
 
     ### DISCUSSION Tests rajoutés
@@ -148,7 +152,10 @@ class TestSaleOrderImport(SaleImportCase):
         new_sale_order = self.env["sale.order"].process_json_import(json_import)
         self.assertEqual(new_sale_order.partner_id.street, "new val customer")
         self.assertEqual(new_sale_order.partner_invoice_id.street, "new val invoicing")
-        self.assertEqual(new_sale_order.partner_shipping_id.street, "2 rue de shipping")
+        self.assertEqual(
+            new_sale_order.partner_shipping_id.street,
+            self.sale_order_example_vals["address_shipping"]["street"],
+        )
 
     def test_order_line_description(self):
         """ Test that a description is taken into account, or
@@ -163,7 +170,7 @@ class TestSaleOrderImport(SaleImportCase):
         )
         self.assertEqual(new_sale_order.order_line[1].name, expected_desc)
 
-    def test_partner_binding(self):
+    def test_partner_binding_sync(self):
         """ Test that a binding is created whenever a customer
         is matched or created """
         json_import = deepcopy(self.sale_order_example_vals)
@@ -181,4 +188,6 @@ class TestSaleOrderImport(SaleImportCase):
 
     def test_payment_xyz(self):
         """ DISCUSSION"""
+        json_import = deepcopy(self.sale_order_example_vals)
+        new_sale_order = self.env["sale.order"].process_json_import(json_import)
         pass
