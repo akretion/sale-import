@@ -1,6 +1,6 @@
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
-
+from copy import deepcopy
 from odoo.addons.queue_job.job import job
 
 MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE = [
@@ -281,11 +281,15 @@ class SaleOrder(models.Model):
             for idx, command_line in enumerate(line_list):
                 # line_list format:[(0, 0, {...}), (0, 0, {...})]
                 if command_line[0] in (0, 1):  # create or update values
+                    # DISCUSSION clean ?
                     # keeps command number and ID (or 0)
-                    old_line_data = command_line[2]
+                    old_line_data = deepcopy(command_line[2])
+                    # give a virtual order_id for the fiscal position/taxes
+                    old_line_data["order_id"] = self.env["sale.order"].new(order)
                     new_line_data = self._si_simulate_onchanges_play_onchanges(
                         "sale.order.line", old_line_data, line_onchange_fields
                     )
+                    del new_line_data["order_id"]
                     new_line = (command_line[0], command_line[1], new_line_data)
                     processed_order_lines.append(new_line)
                     # in place modification of the sales order line in the list

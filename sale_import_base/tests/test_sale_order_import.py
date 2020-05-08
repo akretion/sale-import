@@ -124,8 +124,6 @@ class TestSaleOrderImport(SaleImportCase):
     def test_order_country_with_tax(self):
         """ Test fiscal position is applied correctly
         in case the destination country has tax """
-        # TODO applying onchanges doesn't give an accessibel sale_order_id to the
-        # sale.order.lines, thus no fp -> no tax change
         json_import = deepcopy(self.sale_order_example_vals)
         json_import["address_shipping"]["country_code"] = "CH"
         new_sale_order = self.env["sale.order"].process_json_import(json_import)
