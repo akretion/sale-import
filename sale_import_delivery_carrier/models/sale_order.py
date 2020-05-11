@@ -4,22 +4,22 @@ from odoo import models
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    def _si_validate_datamodel(self, datamodel_instance):
-        super()._si_validate_datamodel(datamodel_instance)
-        self._si_validate_delivery_carrier(datamodel_instance)
+    def _si_finalize(self, sale_order, raw_import_data):
+        super()._si_finalize(sale_order, raw_import_data)
+        self._si_create_delivery_line(sale_order, raw_import_data)
 
-    def _si_validate_delivery_carrier(self, datamodel_instance):
-        pass  # todo
-
-    def _si_process_m2os(self, so_vals):
-        super()._si_process_m2os(so_vals)
-        self._si_process_delivery_carrier(so_vals)
-
-    def _si_process_delivery_carrier(self, so_vals):  # todo
-        # delivery_carrier = self.env["delivery.carrier"].search(
-        #     [("name", "=", so_vals.get("delivery_carrier") and so_vals["delivery_carrier"].get("name"))]
-        # )
-        # if delivery_carrier:
-        #     so_vals["carrier_id"] = delivery_carrier.id
-        # del so_vals["delivery_carrier"]
-        pass
+    def _si_create_delivery_line(self, sale_order, data):
+        if not data.get("delivery_carrier"):
+            return
+        delivery_carrier = self.env["delivery.carrier"].search(
+            [("name", "=", data["delivery_carrier"]["name"])]
+        )
+        if delivery_carrier:
+            sale_order.carrier_id = delivery_carrier
+            price = data["delivery_carrier"]["price_unit"]
+            discount = data["delivery_carrier"]["discount"]
+            carrier_line = sale_order._create_delivery_line(delivery_carrier, price)
+            carrier_line.discount = discount
+            # DISCUSSION: création de la ligne. _create_delivery_line
+            # applique les taxes, quid des taxes pour nous notre ligne de delivery ?
+        del data["delivery_carrier"]
