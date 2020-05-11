@@ -5,5 +5,7 @@
     </record>
     <record id="sale_channel.sale_channel_ebay" model="sale.channel">
         <field name="allow_match_on_email" eval="True"/>
+        <field name="sale_orders_check_amounts_untaxed" eval="True"/>
+        <field name="sale_orders_check_amounts_total" eval="True"/>
     </record>
 </odoo>

@@ -6,6 +6,18 @@ from odoo import fields, models
 class SaleChannelPartnerBinding(models.Model):
     _name = "res.partner.binding"
     _description = "Sale Channel Partner Binding"
+    _sql_constraints = [
+        (
+            "partner_channel_uniq",
+            "unique(partner_id, sale_channel_id)",
+            "partner-channel pairs for bindings are unique",
+        ),
+        (
+            "external_id_channel_uniq",
+            "unique(external_id, sale_channel_id)",
+            "external_id-channel pairs for bindings are unique",
+        ),
+    ]
 
     sale_channel_id = fields.Many2one(
         "sale.channel", "Sale Channel", required=True, ondelete="cascade"

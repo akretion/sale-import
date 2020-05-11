@@ -18,12 +18,6 @@ MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE = [
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    si_exc_check_amounts_untaxed = fields.Boolean(
-        "(technical) Check untaxed amounts against imported values"
-    )
-    si_exc_check_amounts_total = fields.Boolean(
-        "(technical) Check total amounts against imported values"
-    )
     si_amount_untaxed = fields.Float("(technical) Untaxed amount from import")
     si_amount_tax = fields.Float("(technical) Tax amount from import")
     si_amount_total = fields.Float("(technical) Total amount from import")
@@ -62,7 +56,6 @@ class SaleOrder(models.Model):
     def _si_process_simple_fields(self, so_vals):
         # TODO actually use these fields
         del so_vals["transaction_id"]
-        del so_vals["status"]
         del so_vals["currency_code"]
         del so_vals["payment"]
 
@@ -83,7 +76,12 @@ class SaleOrder(models.Model):
 
     def _si_get_partner(self, so_vals, sale_channel):
         external_id = so_vals["address_customer"].get("external_id")
-        binding = self.helper_find_binding(sale_channel, external_id)
+        binding = self.env["res.partner.binding"].search(
+            [
+                ("external_id", "=", external_id),
+                ("sale_channel_id", "=", sale_channel.id),
+            ]
+        )
         if binding:
             return binding.partner_id
         if sale_channel.allow_match_on_email:
@@ -294,15 +292,16 @@ class SaleOrder(models.Model):
     def _si_finalize(self, new_sale_order, raw_import_data):
         """ Extend to add final operations """
         self._si_sync_binding(new_sale_order, raw_import_data)
-        new_sale_order.si_exc_check_amounts_total = True
-        new_sale_order.si_exc_check_amounts_untaxed = True
         self._si_create_payment(new_sale_order, raw_import_data)
 
     def _si_sync_binding(self, sale_order, data):
         if not data["address_customer"].get("external_id"):
             return
-        existing_binding = self.helper_find_binding(
-            sale_order.sale_channel_id, data["address_customer"]["external_id"]
+        existing_binding = self.env["res.partner.binding"].search(
+            [
+                ("sale_channel_id", "=", sale_order.sale_channel_id.id),
+                ("partner_id", "=", sale_order.partner_id.id),
+            ]
         )
         if not existing_binding:
             binding_vals = {

@@ -40,7 +40,6 @@ class SaleOrderDatamodel(BaseDatamodel):
     lines = fields.NestedModel("sale.order.line", many=True, required=True)
     amount = fields.NestedModel("sale.order.amount", required=True)
     transaction_id = fields.Integer()  # DISCUSSION: intégré dans payment ?
-    status = fields.Str()
     invoice = fields.NestedModel("sale.order.invoice")
     sale_channel = fields.Str()
     delivery_carrier = fields.NestedModel("delivery.carrier")
