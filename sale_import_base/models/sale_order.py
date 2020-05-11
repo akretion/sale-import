@@ -1,6 +1,8 @@
+from copy import deepcopy
+
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
-from copy import deepcopy
+
 from odoo.addons.queue_job.job import job
 
 MAPPINGS_SALE_ORDER_ADDRESS_SIMPLE = [
@@ -26,86 +28,43 @@ class SaleOrder(models.Model):
     si_amount_tax = fields.Float("(technical) Tax amount from import")
     si_amount_total = fields.Float("(technical) Total amount from import")
 
-    def batch_process_json_imports(self, imports, **kwargs):
+    def batch_process_json_imports(self, imports):
         """
-        For an up-to-date version of the imports format, check:
-            1. datamodels
-            2. _si_validate_datamodel function
-        kwargs effectively function as way to pass context to jobs
+        For an up-to-date version of the imports format, check datamodels
         methods prefixed by "si" are related to sale imports
         """
         jobs = self.env["queue.job"]
         for el in imports:
-            new_job = self.with_delay(self.process_json_import(el, kwargs))
+            new_job = self.with_delay(self.process_json_import(el))
             jobs += new_job
         return jobs
 
     @job
-    def process_json_import(self, data, **kwargs):
-        errors = self.env.datamodels["sale.order"].validate(data)
+    def process_json_import(self, raw_data):
+        errors = self.env.datamodels["sale.order"].validate(raw_data)
         if errors:
             raise ValidationError(_("Import could not be validated: %s" % errors))
-        so_datamodel = self.env.datamodels["sale.order"].load(data)
-        # validation and value processing: we could extend datamodel with the same idea
-        self._si_validate_datamodel(so_datamodel)
-        so_dump_raw = so_datamodel.dump()
-        so_vals = self._si_process_dump(so_dump_raw)
+        data = deepcopy(raw_data)
+        so_vals = self._si_process_data(data)
         new_sale_order = self.env["sale.order"].create(so_vals)
-        new_sale_order._si_finalize(new_sale_order, data)
+        new_sale_order._si_finalize(new_sale_order, raw_data)
         return new_sale_order
 
-    # DATAMODEL VALIDATORS
-    def _si_validate_datamodel(self, datamodel_instance):
-        """ Extend this method to add your validators against the DB """
-        # self._si_validate_address_customer(datamodel_instance)
-        self._si_validate_product_codes(datamodel_instance)
-        self._si_validate_sale_channel(datamodel_instance)
-        self._si_validate_currency_code(datamodel_instance)
-        self._si_validate_payment(datamodel_instance)
-
-    # def _si_validate_address_customer(self, datamodel_instance):
-    #     partner = self.env["res.partner"].search(
-    #         [("email", "=", datamodel_instance.address_customer.email)]
-    #     )
-    #     if len(partner.ids) != 1:
-    #         raise ValidationError(_("Could not find one partner"))
-
-    def _si_validate_product_codes(self, datamodel_instance):
-        for line in datamodel_instance.lines:
-            product = self.env["product.product"].search(
-                [("default_code", "=", line.product_code)]
-            )
-            if len(product.ids) != 1:
-                raise ValidationError(_("Could not find one product"))
-
-    def _si_validate_sale_channel(self, datamodel_instance):
-        sale_channel = self.env["sale.channel"].search(
-            [("name", "=", datamodel_instance.sale_channel)]
-        )
-        if len(sale_channel.ids) != 1:
-            raise ValidationError(_("Could not find one sale channel"))
-
-    def _si_validate_currency_code(self, datamodel_instance):
-        pass  # todo
-
-    def _si_validate_payment(self, datamodel_instance):
-        pass  # todo
-
     # DATAMODEL PROCESSORS
-    def _si_process_dump(self, so_vals):
+    def _si_process_data(self, so_vals):
         """ Transform values in-place
          to make it usable in create() """
         self._si_process_simple_fields(so_vals)
         self._si_process_m2os(so_vals)
-        # todo clean
         so_vals = self._si_simulate_onchanges(so_vals)
         return so_vals
 
     def _si_process_simple_fields(self, so_vals):
         # TODO actually use these fields
-        del so_vals["payment_mode"]
         del so_vals["transaction_id"]
         del so_vals["status"]
+        del so_vals["currency_code"]
+        del so_vals["payment"]
 
     def _si_process_m2os(self, so_vals):
         channel_id = self._si_get_channel(so_vals)
@@ -115,7 +74,6 @@ class SaleOrder(models.Model):
         self._si_process_amount(so_vals)
         self._si_process_invoice(so_vals)
         self._si_process_sale_channel(so_vals)
-        self._si_process_currency_code(so_vals)
 
     def _si_get_channel(self, so_vals):
         sale_channel = self.env["sale.channel"].search(
@@ -152,7 +110,7 @@ class SaleOrder(models.Model):
         vals_addr_customer = so_vals["address_customer"]
         new_state = (
             self.env["res.country.state"]
-            .search([("code", "=", vals_addr_customer["state_code"])])
+            .search([("code", "=", vals_addr_customer.get("state_code"))])
             .id
         )
         partner_id.state_id = new_state
@@ -181,10 +139,11 @@ class SaleOrder(models.Model):
             field = address_field[1]
             vals_key = address_field[2]
             type = address_field[3]
-            addr["state_id"] = self.env["res.country.state"].search(
-                [("code", "=", addr["state_code"])]
-            )
-            del addr["state_code"]
+            if addr.get("state_code"):
+                addr["state_id"] = self.env["res.country.state"].search(
+                    [("code", "=", addr.get("state_code"))]
+                )
+                del addr["state_code"]
             addr["country_id"] = self.env["res.country"].search(
                 [("code", "=", addr["country_code"])]
             )
@@ -212,7 +171,7 @@ class SaleOrder(models.Model):
             )
             qty = line["qty"]
             price_unit = line["price_unit"]
-            description = line["description"]
+            description = line.get("description") or None
             discount = line["discount"]
             line_vals_dict = {
                 "product_id": product_id,
@@ -234,10 +193,6 @@ class SaleOrder(models.Model):
     def _si_process_invoice(self, so_vals):
         # TODO actually use that val
         del so_vals["invoice"]
-
-    def _si_process_currency_code(self, so_vals):
-        # TODO actually use that val
-        del so_vals["currency_code"]
 
     def _si_process_sale_channel(self, so_vals):
         channel = self.env["sale.channel"].search(
@@ -281,7 +236,6 @@ class SaleOrder(models.Model):
             for idx, command_line in enumerate(line_list):
                 # line_list format:[(0, 0, {...}), (0, 0, {...})]
                 if command_line[0] in (0, 1):  # create or update values
-                    # DISCUSSION clean ?
                     # keeps command number and ID (or 0)
                     old_line_data = deepcopy(command_line[2])
                     # give a virtual order_id for the fiscal position/taxes
@@ -339,13 +293,14 @@ class SaleOrder(models.Model):
     # FINALIZERS
     def _si_finalize(self, new_sale_order, raw_import_data):
         """ Extend to add final operations """
-        if raw_import_data["address_customer"].get("external_id"):
-            self._si_sync_binding(new_sale_order, raw_import_data)
+        self._si_sync_binding(new_sale_order, raw_import_data)
         new_sale_order.si_exc_check_amounts_total = True
         new_sale_order.si_exc_check_amounts_untaxed = True
-        self._si_create_payment(raw_import_data)
+        self._si_create_payment(new_sale_order, raw_import_data)
 
     def _si_sync_binding(self, sale_order, data):
+        if not data["address_customer"].get("external_id"):
+            return
         existing_binding = self.helper_find_binding(
             sale_order.sale_channel_id, data["address_customer"]["external_id"]
         )
@@ -357,8 +312,25 @@ class SaleOrder(models.Model):
             }
             self.env["res.partner.binding"].create(binding_vals)
 
-    def _si_create_payment(self, raw_import_data):
-        pass  # todo
+    def _si_create_payment(self, sale_order, data):
+        if not data.get("payment"):
+            return
+        pmt_data = data["payment"]
+        acquirer_name = pmt_data["mode"]
+        acquirer = self.env["payment.acquirer"].search([("name", "=", acquirer_name)])
+        payment_vals = {
+            "acquirer_id": acquirer.id,
+            "type": "server2server",
+            "state": "done",
+            "amount": pmt_data["amount"],
+            "fees": 0.00,  # DISCUSSION
+            "reference": pmt_data["reference"],
+            "acquirer_reference": pmt_data["reference"],
+            "sale_order_ids": [4, 0, [sale_order.id]],
+            "currency_id": sale_order.currency_id.id,
+        }
+        new_pmt = self.env["payment.transaction"].create(payment_vals)
+        sale_order.transaction_ids = new_pmt
 
     def helper_find_binding(self, sale_channel, external_id):
         binding = self.env["res.partner.binding"].search(

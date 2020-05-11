@@ -6,7 +6,7 @@
 There is an error related to tax calculations.</field>
         <field name="sequence">50</field>
         <field name="model">sale.order</field>
-        <field name="code">failed = sale.si_exc_check_amounts_total and abs(sale.amount_total - sale.si_amount_total) >= 0.01</field>
+        <field name="code">failed = obj.si_exc_check_amounts_total and abs(obj.amount_total - obj.si_amount_total) &gt;= 0.01</field>
     </record>
     <record id="exc_wrong_untaxed_amount" model="exception.rule">
         <field name="name">Inconsistent untaxed amounts</field>
@@ -14,6 +14,6 @@ There is an error related to tax calculations.</field>
 There is an error related to the amount calculation.</field>
         <field name="sequence">50</field>
         <field name="model">sale.order</field>
-        <field name="code">failed = sale.si_exc_check_amounts_untaxed and abs(sale.amount_total - sale.si_amount_total) >= 0.01</field>
+        <field name="code">failed = obj.si_exc_check_amounts_untaxed and abs(obj.amount_untaxed - obj.si_amount_untaxed) &gt;= 0.01</field>
     </record>
 </odoo>
