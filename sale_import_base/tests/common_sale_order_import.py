@@ -1,5 +1,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+from copy import deepcopy
+
 from odoo.addons.datamodel.tests.common import SavepointDatamodelCase
 from odoo.addons.sale.tests.test_sale_common import TestCommonSaleNoChart
 
@@ -103,10 +105,9 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "lines": [cls.line_valid_1, cls.line_valid_2],
             "amount": cls.amount_valid,
             "transaction_id": 123,
-            "status": "Does not matter",
             "invoice": cls.sale_order_invoice_example,
             "sale_channel": cls.sale_channel_ebay.name,
-            "currency_code": "EUR",
+            "currency_code": "USD",
             "pricelist_id": cls.env.ref("product.list0").id,
         }
 
@@ -170,10 +171,14 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
             "mode": "credit_card",
             "amount": 640.00,
             "reference": "PMT-EXAMPLE-001",
-            "currency_code": "EUR",
+            "currency_code": "USD",
         }
         cls.sale_order_example_vals["payment"] = payment_vals
 
     @classmethod
     def setUpMisc(cls):
-        cls.env.ref("base.main_company").currency_id = cls.env.ref("base.EUR")
+        pass
+
+    @property
+    def sale_data(self):
+        return deepcopy(self.sale_order_example_vals)
