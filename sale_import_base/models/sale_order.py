@@ -27,6 +27,12 @@ class SaleOrder(models.Model):
         For an up-to-date version of the imports format, check datamodels
         methods prefixed by "si" are related to sale imports
         """
+        channel_id = self.env.ref("sale_channel.sale_channel_ebay").id
+        channel = self.env["sale.channel"].browse(channel_id)
+        with channel.work_on("sale.order") as work:
+            importer = work.component(usage='importer')
+            importer.run()
+
         jobs = self.env["queue.job"]
         for el in imports:
             new_job = self.with_delay(self.process_json_import(el))
