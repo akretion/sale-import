@@ -181,6 +181,12 @@ class SaleImportCase(
     @classmethod
     def setUpMisc(cls):
         cls.env = cls.env(context=dict(cls.env.context, test_queue_job_no_delay=True))
+        collection = cls.env[
+            "collection.base"
+        ].new()  # DISCUSSION: peut pas mettre queue.job.chunk
+        # Collection obligé d'être un record
+        with collection.work_on("sale.order") as work:
+            cls.importer_component = work.component(usage="import")
 
     @property
     def sale_data(self):
