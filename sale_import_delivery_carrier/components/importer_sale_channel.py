@@ -1,8 +1,8 @@
-from odoo import models
+from odoo.addons.component.core import Component
 
 
-class SaleOrder(models.Model):
-    _inherit = "sale.order"
+class ImporterSaleChannel(Component):
+    _inherit = "importer.sale.channel"
 
     def _si_finalize(self, sale_order, raw_import_data):
         super()._si_finalize(sale_order, raw_import_data)
