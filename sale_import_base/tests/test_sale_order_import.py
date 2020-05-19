@@ -10,12 +10,6 @@ from .common_sale_order_import import SaleImportCase
 class TestSaleOrderImport(SaleImportCase):
     def setUp(self):
         super().setUp()
-        collection = self.env[
-            "collection.base"
-        ].new()  # DISCUSSION: peut pas mettre queue.job.chunk
-        # Collection obligé d'être un record
-        with collection.work_on("sale.order") as work:
-            self.importer_component = work.component(usage="import")
 
     def test_invalid_json(self):
         """ An invalid input will stop the job """

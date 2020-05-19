@@ -10,14 +10,19 @@ from odoo.addons.sale_import_base.tests.common_sale_order_import import SaleImpo
 class TestSaleOrderImport(SaleImportCase):
     def setUp(self):
         super().setUp()
-        self.sale_order_example_vals["delivery_carrier"] = {
+
+    def test_delivery_carrier_charges_applied(self):
+        json_import = self.sale_data
+        json_import["delivery_carrier"] = {
             "name": "Normal Delivery Charges",
             "price_unit": 10.0,
             "discount": 0.0,
         }
-
-    def test_delivery_carrier_charges_applied(self):
-        json_import = self.sale_data
+        json_import["pricelist_id"] = (
+            self.env["product.pricelist"]
+            .search([("currency_id", "=", self.env.ref("base.USD").id)])[0]
+            .id
+        )
         sale_order = self.importer_component.run(json.dumps(json_import))
         delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
         self.assertTrue(delivery_line)
