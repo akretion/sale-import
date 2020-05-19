@@ -1,1 +1,1 @@
-from . import queue_job_splitter
+from . import processor

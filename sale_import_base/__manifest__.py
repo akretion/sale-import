@@ -7,7 +7,7 @@
     "author": "Akretion",
     "website": "https://github.com/akretion/sale-import",
     "depends": [
-        "queue_job",
+        "queue_job_chunk",
         "sale_partner_version",
         "product_code_unique",
         "datamodel",

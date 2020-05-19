@@ -1,6 +1,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from copy import deepcopy
+import json
 
 from odoo.tools import float_compare
 
@@ -17,8 +17,8 @@ class TestSaleOrderImport(SaleImportCase):
         }
 
     def test_delivery_carrier_charges_applied(self):
-        json_import = deepcopy(self.sale_order_example_vals)
-        sale_order = self.env["sale.order"].process_json_import(json_import)
+        json_import = self.sale_data
+        sale_order = self.importer_component.run(json.dumps(json_import))
         delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
         self.assertTrue(delivery_line)
         delivery_amount = delivery_line.price_total
@@ -26,5 +26,4 @@ class TestSaleOrderImport(SaleImportCase):
         equal_delivery = float_compare(
             delivery_amount, expected_delivery_amount, precision_digits=2
         )
-
         self.assertEqual(equal_delivery, 0)
