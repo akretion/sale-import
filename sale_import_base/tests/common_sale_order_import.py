@@ -2,11 +2,14 @@
 
 from copy import deepcopy
 
+from odoo.addons.component.tests.common import SavepointComponentCase
 from odoo.addons.datamodel.tests.common import SavepointDatamodelCase
 from odoo.addons.sale.tests.test_sale_common import TestCommonSaleNoChart
 
 
-class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
+class SaleImportCase(
+    SavepointDatamodelCase, TestCommonSaleNoChart, SavepointComponentCase
+):
     @classmethod
     def setUpClass(cls):
         super(SaleImportCase, cls).setUpClass()
@@ -177,8 +180,17 @@ class SaleImportCase(SavepointDatamodelCase, TestCommonSaleNoChart):
 
     @classmethod
     def setUpMisc(cls):
-        pass
+        cls.env = cls.env(context=dict(cls.env.context, test_queue_job_no_delay=True))
 
     @property
     def sale_data(self):
         return deepcopy(self.sale_order_example_vals)
+
+    @property
+    def sale_data_multi(self):
+        result = [
+            deepcopy(self.sale_order_example_vals),
+            deepcopy(self.sale_order_example_vals),
+        ]
+        result[1]["payment"]["reference"] = "PMT-EXAMPLE-002"
+        return result
