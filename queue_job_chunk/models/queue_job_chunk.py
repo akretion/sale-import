@@ -13,8 +13,7 @@ class QueueJobChunk(models.Model):
     def _get_default_company_id(self):
         for rec in self:
             if rec.reference:
-                fields = rec.reference._fields
-                if "company_id" in fields:
+                if "company_id" in rec.reference._fields:
                     rec.company_id = rec.reference.company_id
                     return
             rec.company_id = self.env.uid.company_id
