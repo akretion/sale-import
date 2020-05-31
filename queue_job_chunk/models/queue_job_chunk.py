@@ -16,7 +16,7 @@ class QueueJobChunk(models.Model):
                 fields = rec.reference._fields
                 if "company_id" in fields:
                     rec.company_id = rec.reference.company_id
-                    return
+                    continue
             rec.company_id = self.env.uid.company_id
 
     @api.depends("model_id", "record_id")
