@@ -13,8 +13,7 @@ class QueueJobChunk(models.Model):
     def _get_default_company_id(self):
         for rec in self:
             if rec.reference:
-                fields = rec.reference._fields
-                if "company_id" in fields:
+                if "company_id" in rec.reference._fields:
                     rec.company_id = rec.reference.company_id
                     continue
             rec.company_id = self.env.uid.company_id
@@ -48,8 +47,7 @@ class QueueJobChunk(models.Model):
         self.enqueue_job()
 
     def enqueue_job(self):
-        job = self.with_delay()._enqueue_job()
-        return job
+        return self.with_delay()._enqueue_job()
 
     @job
     def _enqueue_job(self):
