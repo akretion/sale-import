@@ -47,8 +47,7 @@ class QueueJobChunk(models.Model):
         self.enqueue_job()
 
     def enqueue_job(self):
-        job = self.with_delay()._enqueue_job()
-        return job
+        return self.with_delay()._enqueue_job()
 
     @job
     def _enqueue_job(self):
