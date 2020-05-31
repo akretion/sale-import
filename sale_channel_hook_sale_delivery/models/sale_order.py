@@ -8,5 +8,7 @@ class SaleOrder(models.Model):
 
     def _create_delivery_line(self, carrier, price_unit):
         result = super()._create_delivery_line(carrier, price_unit)
-        self.execute_hook("delivery", result)
+        channel = self.channel_id
+        if channel:
+            channel.execute_hook("delivery", result)
         return result
