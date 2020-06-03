@@ -1,5 +1,5 @@
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
-
+#  Copyright (c) Akretion 2020
+#  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 from psycopg2 import IntegrityError
 
 from odoo.tests import TransactionCase
