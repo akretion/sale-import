@@ -8,7 +8,7 @@ class TestSaleChannel(TestCommonSaleNoChart):
     def setUp(self):
         super().setUp()
         self.sale_channel = self.env.ref("sale_channel.sale_channel_amazon")
-        self.sale_order = self.env.ref("sale.sale_order_3")
+        self.sale_order = self.env.ref("sale.sale_order_4")
         self.partner = self.env.ref("base.res_partner_4")
 
     def test_sale_channel(self):

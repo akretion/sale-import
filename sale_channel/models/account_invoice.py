@@ -8,5 +8,5 @@ class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     sale_channel_id = fields.Many2one(
-        "sale.channel", string="Sale Channel", ondelete="set null"
+        "sale.channel", string="Sale Channel", ondelete="restrict"
     )

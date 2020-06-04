@@ -15,6 +15,5 @@
         "views/account_invoice.xml",
         "views/sale_channel.xml",
     ],
-    "external_dependencies": {"python": ["psycopg2"]},
     "demo": ["demo/demo.xml"],
 }
