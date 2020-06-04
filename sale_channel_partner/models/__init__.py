@@ -1,3 +1,3 @@
 from . import sale_channel
-from . import partner_binding
+from . import sale_channel_partner
 from . import res_partner

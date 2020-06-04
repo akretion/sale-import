@@ -6,6 +6,6 @@ from odoo import fields, models
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    partner_bind_ids = fields.One2many(
-        "res.partner.binding", "partner_id", string="Channel bindings"
+    sale_channel_partner_ids = fields.One2many(
+        "sale.channel.partner", "partner_id", string="Sale Channel Bindings"
     )

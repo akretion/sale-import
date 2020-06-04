@@ -9,7 +9,7 @@
                 <xpath expr="//group" position="before">
                     <div class="oe_button_box" name="button_box">
                         <button name="button_open_bindings" type="object" class="oe_stat_button" icon="fa-link">
-                            <field name="count_bindings" widget="statinfo"/>
+                            <field name="count_sale_channel_partners" widget="statinfo"/>
                         </button>
                     </div>
                 </xpath>

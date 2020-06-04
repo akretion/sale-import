@@ -1,7 +1,7 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 {
-    "name": "Sale Channel Binding",
+    "name": "Sale Channel Partner",
     "summary": "Bind sale channels to contacts",
     "version": "12.0.1.0.0",
     "category": "Generic Modules/Sale",
@@ -13,7 +13,7 @@
         "security/ir.model.access.csv",
         "views/sale_channel.xml",
         "views/res_partner.xml",
-        "views/partner_binding.xml",
+        "views/sale_channel_partner.xml",
     ],
     "demo": ["demo/demo.xml"],
 }

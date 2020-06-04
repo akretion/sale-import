@@ -9,7 +9,7 @@ class TestConstraints(TransactionCase):
     def setUp(self):
         super().setUp()
         self.binding = self.env.ref(
-            "sale_channel_partner_binding.sale_channel_partner_binding_willie_ebay"
+            "sale_channel_partner.sale_channel_partner_willie_ebay"
         )
 
     def test_constraint_channel_extid(self):

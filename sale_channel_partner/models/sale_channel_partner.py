@@ -3,19 +3,19 @@
 from odoo import fields, models
 
 
-class SaleChannelPartnerBinding(models.Model):
-    _name = "res.partner.binding"
-    _description = "Sale Channel Partner Binding"
+class SaleChannelPartner(models.Model):
+    _name = "sale.channel.partner"
+    _description = "Sale Channel Partner"
     _sql_constraints = [
         (
             "partner_channel_uniq",
             "unique(partner_id, sale_channel_id)",
-            "partner-channel pairs for bindings are unique",
+            "partner-channel pairs for sale channel partners are unique",
         ),
         (
             "external_id_channel_uniq",
             "unique(external_id, sale_channel_id)",
-            "external_id-channel pairs for bindings are unique",
+            "external_id-channel pairs for sale channel partners are unique",
         ),
     ]
 
