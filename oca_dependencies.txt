@@ -1,0 +1,1 @@
+rest-framework https://github.com/acsone/rest-framework 12.0-datamodel-experiment
