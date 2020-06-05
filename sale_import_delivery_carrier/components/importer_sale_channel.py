@@ -4,11 +4,11 @@ from odoo.addons.component.core import Component
 class ImporterSaleChannel(Component):
     _inherit = "importer.sale.channel"
 
-    def _si_finalize(self, sale_order, raw_import_data):
-        super()._si_finalize(sale_order, raw_import_data)
-        self._si_create_delivery_line(sale_order, raw_import_data)
+    def finalize(self, sale_order, raw_import_data):
+        super().finalize(sale_order, raw_import_data)
+        self.create_delivery_line(sale_order, raw_import_data)
 
-    def _si_create_delivery_line(self, sale_order, data):
+    def create_delivery_line(self, sale_order, data):
         if not data.get("delivery_carrier"):
             return
         delivery_carrier = self.env["delivery.carrier"].search(
