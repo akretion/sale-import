@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_queue_job_form" model="ir.ui.view">
+        <field name="model">queue.job.chunk</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="button_retry" type="object" string="Retry job"
+                            attrs="{'invisible': [('state', '=', 'done')]}"
+                            class="btn-primary"
+                    />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="data_str"/>
+                            <field name="model_name"/>
+                            <field name="record_id"/>
+                            <field name="reference" attrs="{'readonly': 1}"/>
+                            <field name="state" attrs="{'readonly': 1}"/>
+                            <field name="state_info" attrs="{'readonly': 1}"/>
+                        </group>
+                        <group name="component">
+                            <field name="usage"/>
+                            <field name="apply_on_model"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_queue_job_tree" model="ir.ui.view">
+        <field name="model">queue.job.chunk</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="id"/>
+                <field name="state"/>
+                <field name="model_name"/>
+                <field name="record_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_queue_job_chunk" model="ir.actions.act_window">
+        <field name="name">Queue Job Chunks</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">queue.job.chunk</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_queue_job_chunk" name="Queue Chunks" parent="queue_job.menu_queue_job_root"
+              action="action_queue_job_chunk"/>
+
+</odoo>
