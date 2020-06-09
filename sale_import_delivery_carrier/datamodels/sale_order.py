@@ -1,8 +1,8 @@
 from odoo.addons.datamodel import fields
-from odoo.addons.datamodel.datamodels.base import BaseDatamodel
+from odoo.addons.datamodel.core import Datamodel
 
 
-class SaleOrderDatamodel(BaseDatamodel):
+class SaleOrderDatamodel(Datamodel):
     _inherit = "sale.order"
 
     delivery_carrier = fields.NestedModel("delivery.carrier")

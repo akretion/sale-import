@@ -25,7 +25,7 @@ class TestSaleOrderImport(SaleImportCase):
         )
         sale_order = self.importer_component.run(json.dumps(data))
         delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
-        self.assertTrue(delivery_line)
+        self.assertEqual(len(delivery_line.ids), 1)
         delivery_amount = delivery_line.price_total
         expected_delivery_amount = 10.0
         equal_delivery = float_compare(
