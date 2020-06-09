@@ -19,11 +19,6 @@ class TestSaleOrderImport(SaleImportCase):
             "price_unit": 10.0,
             "discount": 0.0,
         }
-        data["pricelist_id"] = (
-            self.env["product.pricelist"]
-            .search([("currency_id", "=", self.env.ref("base.USD").id)])[0]
-            .id
-        )
         sale_order = self.importer_component.run(json.dumps(data))
         delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
         self.assertEqual(len(delivery_line.ids), 1)
@@ -33,3 +28,11 @@ class TestSaleOrderImport(SaleImportCase):
             delivery_amount, expected_delivery_amount, precision_digits=2
         )
         self.assertEqual(equal_delivery, 0)
+
+    def test_deliver_country_with_tax(self):
+        """ Test fiscal position is applied correctly """
+        data = self.sale_data
+        data["address_shipping"]["country_code"] = "CH"
+        new_sale_order = self.importer_component.run(json.dumps(data))
+        delivery_line = new_sale_order.order_line.filtered(lambda r: r.is_delivery)
+        self.assertEqual(delivery_line.tax_id, self.tax_swiss)
