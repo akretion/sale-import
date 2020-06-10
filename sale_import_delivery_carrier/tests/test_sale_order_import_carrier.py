@@ -9,28 +9,34 @@ from odoo.addons.sale_import_base.tests.common_sale_order_import import SaleImpo
 
 
 class TestSaleOrderImport(SaleImportCase):
-    def setUp(self):
-        super().setUp()
-
-    def test_delivery_carrier_charges_applied(self):
-        data = self.sale_data
+    @property
+    def sale_data(self):
+        data = super().sale_data
         data["delivery_carrier"] = {
             "name": "Normal Delivery Charges",
             "price_unit": 10.0,
             "discount": 0.0,
         }
+        return data
+
+    def setUp(self):
+        super().setUp()
+        self.env.ref("delivery.product_product_delivery_normal").taxes_id = self.tax
+
+    def test_delivery_carrier_charges_applied(self):
+        """ Test delivery line is created with correct amount """
+        data = self.sale_data
         sale_order = self.importer_component.run(json.dumps(data))
         delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
         self.assertEqual(len(delivery_line.ids), 1)
-        delivery_amount = delivery_line.price_total
-        expected_delivery_amount = 10.0
         equal_delivery = float_compare(
-            delivery_amount, expected_delivery_amount, precision_digits=2
+            delivery_line.price_total, 10.9, precision_digits=2
         )
         self.assertEqual(equal_delivery, 0)
 
     def test_deliver_country_with_tax(self):
-        """ Test fiscal position is applied correctly """
+        """ Test fiscal position and tax is applied correctly
+        to the delivery line """
         data = self.sale_data
         data["address_shipping"]["country_code"] = "CH"
         new_sale_order = self.importer_component.run(json.dumps(data))
