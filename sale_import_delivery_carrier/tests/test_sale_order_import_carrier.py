@@ -23,10 +23,16 @@ class TestSaleOrderImport(SaleImportCase):
         super().setUp()
         self.env.ref("delivery.product_product_delivery_normal").taxes_id = self.tax
 
+    def test_delivery_carrier_id(self):
+        """ Test sale order has the correct delivery carrier """
+        sale_order = self.importer_component.run(json.dumps(self.sale_data))
+        self.assertEqual(
+            sale_order.carrier_id, self.env.ref("delivery.normal_delivery_carrier")
+        )
+
     def test_delivery_carrier_charges_applied(self):
         """ Test delivery line is created with correct amount """
-        data = self.sale_data
-        sale_order = self.importer_component.run(json.dumps(data))
+        sale_order = self.importer_component.run(json.dumps(self.sale_data))
         delivery_line = sale_order.order_line.filtered(lambda r: r.is_delivery)
         self.assertEqual(len(delivery_line.ids), 1)
         equal_delivery = float_compare(

@@ -6,6 +6,16 @@ from odoo.addons.component.core import Component
 class ImporterSaleChannel(Component):
     _inherit = "importer.sale.channel"
 
+    def _prepare_sale_vals(self, data):
+        vals = super()._prepare_sale_vals(data)
+        if not data.get("delivery_carrier"):
+            return vals
+        carrier_id = self.env["delivery.carrier"].search(
+            [("name", "=", data["delivery_carrier"]["name"])]
+        )
+        vals.update({"carrier_id": carrier_id.id})
+        return vals
+
     def _prepare_sale_line_vals(self, data, sale_order):
         vals = super()._prepare_sale_line_vals(data, sale_order)
         delivery_line = self._prepare_delivery_line(data, sale_order)
