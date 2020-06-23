@@ -29,13 +29,16 @@ class ImporterSaleChannel(Component):
         )
         partner = sale_order.partner_id
         carrier_with_partner_lang = delivery_carrier.with_context(lang=partner.lang)
-        if carrier_with_partner_lang.product_id.description_sale:
-            description = "{}: {}".format(
-                carrier_with_partner_lang.name,
-                carrier_with_partner_lang.product_id.description_sale,
-            )
-        else:
-            description = carrier_with_partner_lang.name
+        description = data["delivery_carrier"].get("description")
+        if not description:
+            if carrier_with_partner_lang.product_id.description_sale:
+                description = "{}: {}".format(
+                    carrier_with_partner_lang.name,
+                    description
+                    or carrier_with_partner_lang.product_id.description_sale,
+                )
+            else:
+                description = carrier_with_partner_lang.name
         vals = {
             "name": description,
             "product_uom_qty": 1,
