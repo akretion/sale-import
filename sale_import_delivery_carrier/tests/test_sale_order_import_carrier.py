@@ -57,7 +57,7 @@ class TestSaleOrderImport(SaleImportCase):
         """ Test description is applied, or fallback on default
          carrier description """
         chunk_vals1, chunk_vals2 = self.chunk_vals, self.chunk_vals
-        chunk_vals2["data_str"]["payment"]["reference"] = "PMT-002"
+        chunk_vals2["data_str"]["payment"]["reference"] = "PMT-EXAPLE-002"
         del chunk_vals2["data_str"]["delivery_carrier"]["description"]
         self._helper_create_chunk(chunk_vals1)
         delivery_line = self.get_created_sales().order_line.filtered(
