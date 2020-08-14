@@ -1,0 +1,7 @@
+rest-framework https://github.com/acsone/rest-framework 12.0-new-api-wip
+product-attribute
+server-tools
+server-auth
+# TODO change these once their PR is merged
+sale-workflow https://github.com/akretion/sale-workflow 12.0-mig-sale_partner_version
+partner-contact https://github.com/akretion/partner-contact 12.0-mig-partner_address_version
