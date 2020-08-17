@@ -21,7 +21,7 @@ class TestSaleOrderImport(SaleImportCase):
     def test_invalid_json(self):
         """ An invalid input will stop the job """
         chunk_vals = self.chunk_vals
-        del chunk_vals["data_str"]["address_customer"]["street"]
+        del chunk_vals["data_str"]["address_customer"]["name"]
         chunk = self._helper_create_chunk(chunk_vals)
         self.assertEqual(chunk.state, "fail")
 
@@ -143,6 +143,9 @@ class TestSaleOrderImport(SaleImportCase):
         self._helper_create_chunk(self.chunk_vals)
         new_payment = self.get_created_sales().transaction_ids
         self.assertEqual(new_payment.reference, "PMT-EXAMPLE-001")
+        self.assertEqual(new_payment.acquirer_reference, "T123")
+        self.assertEqual(new_payment.amount, 640),
+        self.assertEqual(new_payment.currency_id.name, "USD")
 
     def test_invoice_values(self):
         self._helper_create_chunk(self.chunk_vals)

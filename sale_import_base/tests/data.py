@@ -51,12 +51,11 @@ data = {
         "amount_total": 1090.5,  # 1050 + 40.5 = 1090.5
     },
     "invoice": {"date": "1900-12-30", "number": "IN-123"},
-    "currency_code": "USD",
     "payment": {
         "mode": "credit_card",
         "amount": 640.00,
         "reference": "PMT-EXAMPLE-001",
         "currency_code": "USD",
-        "transaction_id": 123,
+        "acquirer_reference": "T123",
     },
 }
