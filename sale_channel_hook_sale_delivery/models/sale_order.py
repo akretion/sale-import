@@ -9,7 +9,7 @@ class SaleOrder(models.Model):
 
     def _create_delivery_line(self, carrier, price_unit):
         result = super()._create_delivery_line(carrier, price_unit)
-        self.trigger_hook("delivery", result)
+        self.trigger_channel_hook("delivery", result)
         return result
 
     def _get_hook_content_delivery(self, sale_order_line):

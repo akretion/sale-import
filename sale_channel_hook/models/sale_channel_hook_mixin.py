@@ -6,7 +6,7 @@ from odoo import models
 class SaleChannelHookMixin(models.AbstractModel):
     _name = "sale.channel.hook.mixin"
 
-    def trigger_hook(self, hook_name, *args):
+    def trigger_channel_hook(self, hook_name, *args):
         for rec in self:
             if rec.channel_id:
                 hook_content_getter = rec.getattr("_get_hook_content_" + hook_name)

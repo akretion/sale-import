@@ -11,7 +11,7 @@ class SaleOrder(models.Model):
         result = super().write(vals)
         for rec in self:
             if "state" in vals.keys():
-                rec.trigger_hook("sale_state", rec)
+                rec.trigger_channel_hook("sale_state", rec)
         return result
 
     def _get_hook_content_sale_state(self, sale_order):

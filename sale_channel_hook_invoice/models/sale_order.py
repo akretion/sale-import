@@ -12,7 +12,7 @@ class SaleOrder(models.Model):
     def _finalize_invoices(self, invoices, references):
         result = super()._finalize_invoices(invoices, references)
         for invoice, order in references.keys():
-            order.trigger_hook("create_invoice", invoice)
+            order.trigger_channel_hook("create_invoice", invoice)
         return result
 
     def _get_hook_content_create_invoice(self, invoice):
