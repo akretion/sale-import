@@ -15,7 +15,7 @@ class SaleChannel(models.Model):
     auth_token = fields.Char("Secret authentication token")  # DISCUSSION: sécurité
     api_endpoint = fields.Char("Hooks API endpoint")
 
-    def execute_hook(self, hook_name, content):
+    def send_hook_api_request(self, hook_name, content):
         # check necessary info is filled
         if not self.api_endpoint or not self.auth_token:
             raise ValidationError(
@@ -28,7 +28,7 @@ class SaleChannel(models.Model):
         if not getattr(self, "hook_active_" + hook_name):
             return
         payload = {"event": hook_name, "data": content}
-        signature = self._generate_hook_signature(payload)
+        signature = self._generate_hook_request_signature(payload)
         headers = {"X-Hub-Signature": signature}
         url = self.api_endpoint
         response = requests.post(
@@ -37,7 +37,7 @@ class SaleChannel(models.Model):
         # DISCUSSION: on fait quoi avec la response ?
         return response
 
-    def _generate_hook_signature(self, content):
+    def _generate_hook_request_signature(self, content):
         secret = self.auth_token
         signature = hmac.new(
             secret.encode("utf-8"), content.encode("utf-8"), hashlib.sha256

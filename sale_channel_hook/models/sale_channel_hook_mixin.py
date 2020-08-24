@@ -11,4 +11,4 @@ class SaleChannelHookMixin(models.AbstractModel):
             if rec.channel_id:
                 hook_content_getter = rec.getattr("_get_hook_content_" + hook_name)
                 content = hook_content_getter(args)
-                rec.channel_id.execute_hook(hook_name, content)
+                rec.channel_id.send_hook_api_request(hook_name, content)
