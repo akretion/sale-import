@@ -1,6 +1,7 @@
 {
   "sale_orders": [
     {
+      "name": "MySaleOrder1",
       "address_customer": {
         "name": "Thomas Jean",
         "street": "1 rue de Jean",
@@ -39,9 +40,11 @@
         "amount_untaxed": 2950.00,
         "amount_total": 2950.00
       },
-      "pricelist_id": 1
+      "pricelist_id": 1,
+      "date_order": "2020-01-02"
     },
     {
+    "name": "MySaleOrder2",
     "address_customer": {
       "name": "Thomas Jean",
       "street": "1 rue de Jean",
