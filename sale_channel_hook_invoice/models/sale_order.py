@@ -2,6 +2,8 @@
 
 from odoo import models
 
+FIELDS_SIMPLE_COPY = ["name", "amount_total_signed"]
+
 
 class SaleOrder(models.Model):
     _name = "sale.order"
@@ -12,3 +14,9 @@ class SaleOrder(models.Model):
         for invoice, order in references.keys():
             order.trigger_hook("create_invoice", invoice)
         return result
+
+    def _get_hook_content_create_invoice(self, invoice):
+        content = dict()
+        for field in FIELDS_SIMPLE_COPY:
+            content[field] = getattr(invoice, field)
+        return content

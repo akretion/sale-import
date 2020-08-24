@@ -1,12 +1,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import hashlib
-import hmac
-
-import requests
-
-from odoo import _, fields, models
-from odoo.exceptions import ValidationError
+from odoo import models
 
 
 class SaleChannelHookMixin(models.AbstractModel):
@@ -15,4 +9,6 @@ class SaleChannelHookMixin(models.AbstractModel):
     def trigger_hook(self, hook_name, *args):
         for rec in self:
             if rec.channel_id:
-                rec.channel_id.execute_hook(hook_name, args)
+                hook_content_getter = rec.getattr("_get_hook_content_" + hook_name)
+                content = hook_content_getter(args)
+                rec.channel_id.execute_hook(hook_name, content)

@@ -13,3 +13,9 @@ class SaleOrder(models.Model):
             if "state" in vals.keys():
                 rec.trigger_hook("sale_state", rec)
         return result
+
+    def _get_hook_content_sale_state(self, sale_order):
+        state = sale_order.state
+        name = sale_order.name
+        content = "Sale Order %s has been updated to state %s" % name, state
+        return content

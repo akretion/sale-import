@@ -11,3 +11,8 @@ class SaleOrder(models.Model):
         result = super()._create_delivery_line(carrier, price_unit)
         self.trigger_hook("delivery", result)
         return result
+
+    def _get_hook_content_delivery(self, sale_order_line):
+        delivery_no = sale_order_line.name
+        content = "Delivery line created %s" % delivery_no
+        return content
