@@ -4,11 +4,10 @@ from odoo import models
 
 
 class SaleOrder(models.Model):
-    _inherit = "sale.order"
+    _name = "sale.order"
+    _inherit = ["sale.order", "sale.channel.hook.mixin"]
 
     def _create_delivery_line(self, carrier, price_unit):
         result = super()._create_delivery_line(carrier, price_unit)
-        channel = self.channel_id
-        if channel:
-            channel.execute_hook("delivery", result)
+        self.trigger_hook("delivery", result)
         return result

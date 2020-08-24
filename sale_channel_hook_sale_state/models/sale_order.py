@@ -4,11 +4,12 @@ from odoo import models
 
 
 class SaleOrder(models.Model):
-    _inherit = "sale.order"
+    _name = "sale.order"
+    _inherit = ["sale.order", "sale.channel.hook.mixin"]
 
     def write(self, vals):
         result = super().write(vals)
-        if "state" in vals.keys():
-            for rec in self.filtered(lambda r: r.channel_id):
-                rec.channel_id.execute_hook("sale_state", rec.state)
+        for rec in self:
+            if "state" in vals.keys():
+                rec.trigger_hook("sale_state", rec)
         return result

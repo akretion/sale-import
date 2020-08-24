@@ -4,12 +4,11 @@ from odoo import models
 
 
 class SaleOrder(models.Model):
-    _inherit = "sale.order"
+    _name = "sale.order"
+    _inherit = ["sale.order", "sale.channel.hook.mixin"]
 
     def _finalize_invoices(self, invoices, references):
         result = super()._finalize_invoices(invoices, references)
         for invoice, order in references.keys():
-            channel = order.channel_id
-            if channel:
-                channel.execute_hook("create_invoice", invoice)
+            order.trigger_hook("create_invoice", invoice)
         return result
