@@ -24,8 +24,8 @@ class AccountInvoice(models.Model):
             "amount_total": self.amount_total_signed,
             "origin": self.origin,
         }
-        if self.sale_channel_id.hook_active_send_pdf:
-            pdf_bin = self.sale_channel_id.hook_invoice_report.render_qweb_pdf(
+        if self.sale_channel_id.hook_active_create_invoice_send_pdf:
+            pdf_bin = self.sale_channel_id.hook_active_create_invoice_report.render_qweb_pdf(
                 [self.id]
             )
             pdf_encoded = base64.b64encode(pdf_bin)
