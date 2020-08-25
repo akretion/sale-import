@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <form string="Sale Channel">
                     <sheet>
-                        <group>
+                        <group name="general_info">
                             <field name="name"/>
                         </group>
                     </sheet>

@@ -7,7 +7,15 @@
             <field name="inherit_id" ref="sale_channel.sale_channel_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='hooks']" position="inside">
-                    <field name="hook_active_create_invoice"/>
+                    <group>
+                        <field name="hook_active_create_invoice"/>
+                        <field name="hook_active_create_invoice_send_pdf"
+                               attrs="{'invisible': [('hook_active_create_invoice', '=', False)]}"/>
+                        <field name="hook_active_create_invoice_report"
+                               attrs="{'invisible': [('hook_active_create_invoice_send_pdf', '=', False)]}"
+                               domain="['|', ('model', '=', 'account.invoice'), ('name', 'like', 'invoice'), ('type', '=', 'qweb')]"
+                        />
+                    </group>
                 </xpath>
             </field>
         </record>
