@@ -25,9 +25,8 @@ class AccountInvoice(models.Model):
             "origin": self.origin,
         }
         if self.sale_channel_id.hook_active_create_invoice_send_pdf:
-            pdf_bin = self.sale_channel_id.hook_active_create_invoice_report.render_qweb_pdf(
-                [self.id]
-            )
+            report = self.sale_channel_id.hook_active_create_invoice_report
+            pdf_bin = report.render_qweb_pdf([self.id])
             pdf_encoded = base64.b64encode(pdf_bin)
             content["pdf_document"] = pdf_encoded
         return content
