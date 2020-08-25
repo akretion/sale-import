@@ -1,7 +1,7 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-from odoo import fields, models, _, api
+from odoo import _, api, fields, models
 
 
 class StockPicking(models.Model):
@@ -22,7 +22,5 @@ class StockPicking(models.Model):
         pickings_done = all([picking.state == "done" for picking in sale.picking_ids])
         content = None
         if pickings_done:
-            content = {
-                "message": _("Delivery complete %s" % sale.name)
-            }
+            content = {"message": _("Delivery complete %s" % sale.name)}
         return content

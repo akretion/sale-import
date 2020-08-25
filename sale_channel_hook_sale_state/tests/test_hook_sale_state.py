@@ -6,7 +6,6 @@ from odoo.tests import TransactionCase
 
 
 class TestHookSaleState(TransactionCase):
-
     def test_hook_sale_state(self):
         sale = self.env.ref("sale.sale_order_1")
         for state in "draft", "sent", "sale", "done", "cancel":
