@@ -12,12 +12,12 @@ class SaleOrder(models.Model):
         result = super().write(vals)
         for rec in self:
             if "state" in vals.keys():
-                rec.trigger_channel_hook("sale_state", rec)
+                rec.trigger_channel_hook("sale_state")
         return result
 
-    def get_hook_content_sale_state(self, sale_order):
-        state = sale_order.state
-        name = sale_order.name
-        message = _("Sale Order %s has been updated to state %s" % name, state)
+    def get_hook_content_sale_state(self):
+        state = self.state
+        name = self.name
+        message = _("Sale Order {} has been updated to state {}".format(name, state))
         content = {"message": message}
         return content
