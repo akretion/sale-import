@@ -1,6 +1,7 @@
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+#  Copyright (c) Akretion 2020
+#  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-from odoo import models
+from odoo import _, models
 
 
 class SaleOrder(models.Model):
@@ -14,8 +15,9 @@ class SaleOrder(models.Model):
                 rec.trigger_channel_hook("sale_state", rec)
         return result
 
-    def _get_hook_content_sale_state(self, sale_order):
+    def get_hook_content_sale_state(self, sale_order):
         state = sale_order.state
         name = sale_order.name
-        content = "Sale Order %s has been updated to state %s" % name, state
+        message = _("Sale Order %s has been updated to state %s" % name, state)
+        content = {"message": message}
         return content
