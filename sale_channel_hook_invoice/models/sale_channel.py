@@ -10,10 +10,10 @@ class SaleChannel(models.Model):
     hook_active_create_invoice = fields.Boolean("Active invoice hook")
     hook_active_create_invoice_send_pdf = fields.Boolean("Send PDF")
     hook_active_create_invoice_report = fields.Many2one(
-        "ir.ui.view",
-        default=lambda self: self.env.ref("account.report_invoice_document"),
+        "ir.actions.report",
+        default=lambda self: self.env.ref("account.account_invoices_without_payment"),
         required=True,
-        string="Document generation template",
+        string="Document report",
     )
 
     @api.onchange("hook_active_create_invoice")

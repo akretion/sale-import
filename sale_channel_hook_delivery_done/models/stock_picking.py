@@ -17,7 +17,7 @@ class StockPicking(models.Model):
             pick.trigger_channel_hook("delivery_done", pick)
         return res
 
-    def get_hook_content_delivery_done(self):
+    def get_hook_content_delivery_done(self, *args):
         sale = self.sale_id
         pickings_done = all([picking.state == "done" for picking in sale.picking_ids])
         content = None

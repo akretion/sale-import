@@ -15,7 +15,7 @@ class SaleOrder(models.Model):
                 rec.trigger_channel_hook("sale_state")
         return result
 
-    def get_hook_content_sale_state(self):
+    def get_hook_content_sale_state(self, *args):
         state = self.state
         name = self.name
         message = _("Sale Order {} has been updated to state {}".format(name, state))
