@@ -9,6 +9,8 @@ import requests
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
+from odoo.addons.queue_job.job import job
+
 
 class SaleChannel(models.Model):
     _inherit = "sale.channel"
@@ -16,6 +18,7 @@ class SaleChannel(models.Model):
     auth_token = fields.Char("Secret authentication token")  # DISCUSSION: sécurité
     api_endpoint = fields.Char("Hooks API endpoint")
 
+    @job
     def send_hook_api_request(self, hook_name, content):
         # check necessary info is filled
         if not self.api_endpoint or not self.auth_token:
@@ -32,10 +35,8 @@ class SaleChannel(models.Model):
         signature = self._generate_hook_request_signature(payload)
         headers = {"X-Hub-Signature": signature}
         url = self.api_endpoint
-        response = requests.post(
-            url, data=payload, headers=headers
-        )  # DISCUSSION: timeout?
-        # DISCUSSION: on fait quoi avec la response ?
+        response = requests.post(url, data=payload, headers=headers)
+        response.raise_for_status()
         return response
 
     def _generate_hook_request_signature(self, content):

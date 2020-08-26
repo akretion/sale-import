@@ -13,4 +13,6 @@ class SaleChannelHookMixin(models.AbstractModel):
                 hook_content_getter = getattr(rec, "get_hook_content_" + hook_name)
                 content = hook_content_getter(args)
                 if content is not None:
-                    rec.sale_channel_id.send_hook_api_request(hook_name, content)
+                    rec.sale_channel_id.with_delay().send_hook_api_request(
+                        hook_name, content
+                    )
