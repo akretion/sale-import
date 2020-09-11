@@ -7,10 +7,12 @@
             <field name="inherit_id" ref="sale_channel.sale_channel_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='hooks']" position="inside">
-                    <field name="hook_active_delivery_done"/>
-                    <field name="hook_picking_type_ids">
-                        <field name="name"/>
-                    </field>
+                    <group>
+                        <field name="hook_active_delivery_done"/>
+                        <field name="hook_picking_type_ids">
+                            <field name="name"/>
+                        </field>
+                    </group>
                 </xpath>
             </field>
         </record>
