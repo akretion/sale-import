@@ -16,8 +16,4 @@ class SaleOrder(models.Model):
         return result
 
     def get_hook_content_sale_state(self, *args):
-        state = self.state
-        name = self.name
-        message = _("Sale Order {} has been updated to state {}".format(name, state))
-        content = {"message": message}
-        return content
+        return {"sale_name": self.name, "state": self.state}

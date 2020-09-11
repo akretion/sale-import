@@ -31,10 +31,10 @@ class SaleChannel(models.Model):
         # check hook is activated
         if not getattr(self, "hook_active_" + hook_name):
             return
-        payload = {"event": hook_name, "data": content}
+        payload = {content}
         signature = self._generate_hook_request_signature(payload)
         headers = {"X-Hub-Signature": signature}
-        url = self.api_endpoint
+        url = self.api_endpoint + hook_name
         response = requests.post(url, data=payload, headers=headers)
         response.raise_for_status()
         return response

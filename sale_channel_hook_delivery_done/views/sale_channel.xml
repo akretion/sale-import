@@ -8,6 +8,9 @@
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='hooks']" position="inside">
                     <field name="hook_active_delivery_done"/>
+                    <field name="hook_picking_type_ids">
+                        <field name="name"/>
+                    </field>
                 </xpath>
             </field>
         </record>

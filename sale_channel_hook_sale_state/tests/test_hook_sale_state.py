@@ -10,6 +10,5 @@ class TestHookSaleState(TransactionCase):
         sale = self.env.ref("sale.sale_order_1")
         for state in "draft", "sent", "sale", "done", "cancel":
             sale.write({"state": state})
-            message = _("Sale Order SO001 has been updated to state %s" % state)
-            content = {"message": message}
-            self.assertEqual(content, sale.get_hook_content_sale_state())
+            expected_content = {"sale_name": sale.name, "state": sale.state}
+            self.assertEqual(expected_content, sale.get_hook_content_sale_state())
