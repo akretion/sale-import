@@ -3,8 +3,6 @@
 
 from datetime import datetime
 
-from odoo.tools import float_compare
-
 from odoo.addons.account.tests.account_test_classes import AccountingTestCase
 
 

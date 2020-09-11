@@ -19,10 +19,7 @@ class AccountInvoice(models.Model):
         return result
 
     def get_hook_content_create_invoice(self):
-        content = {
-            "sale_name": self.origin,
-            "invoice": self.number,
-        }
+        content = {"sale_name": self.origin, "invoice": self.number}
         if self.sale_channel_id.hook_active_create_invoice_send_pdf:
             report = self.sale_channel_id.hook_active_create_invoice_report
             pdf_bin = report.render_qweb_pdf([self.id])[0]
