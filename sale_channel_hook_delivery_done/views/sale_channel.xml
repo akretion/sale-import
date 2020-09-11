@@ -9,9 +9,7 @@
                 <xpath expr="//group[@name='hooks']" position="inside">
                     <group>
                         <field name="hook_active_delivery_done"/>
-                        <field name="hook_picking_type_ids">
-                            <field name="name"/>
-                        </field>
+                        <field name="hook_picking_type_ids" widget="many2many_checkboxes" attrs="{'invisible': [('hook_active_delivery_done', '=', False)]}"/>
                     </group>
                 </xpath>
             </field>
