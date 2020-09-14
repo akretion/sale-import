@@ -2,10 +2,13 @@
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import base64
+import logging
 
 from odoo import models
 
 FIELDS_SIMPLE_COPY = ["name", "amount_total_signed"]
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountInvoice(models.Model):
@@ -16,6 +19,8 @@ class AccountInvoice(models.Model):
         result = super().action_invoice_paid()
         for rec in self:
             origin = rec.invoice_line_ids.mapped("sale_line_ids").mapped("order_id")
+            if len(origin.ids) > 1:
+                _logger.warning("Two possible SOs detected for invoice hook")
             if origin:
                 rec.trigger_channel_hook("create_invoice", origin[0])
         return result
