@@ -15,11 +15,13 @@ class AccountInvoice(models.Model):
     def action_invoice_paid(self):
         result = super().action_invoice_paid()
         for rec in self:
-            rec.trigger_channel_hook("create_invoice")
+            origin = rec.invoice_line_ids.mapped("sale_line_ids").mapped("order_id")
+            if origin:
+                rec.trigger_channel_hook("create_invoice", origin[0])
         return result
 
-    def get_hook_content_create_invoice(self):
-        content = {"sale_name": self.origin, "invoice": self.number}
+    def get_hook_content_create_invoice(self, origin):
+        content = {"sale_name": origin.name, "invoice": self.number}
         if self.sale_channel_id.hook_active_create_invoice_send_pdf:
             report = self.sale_channel_id.hook_active_create_invoice_report
             pdf_bin = report.render_qweb_pdf([self.id])[0]
