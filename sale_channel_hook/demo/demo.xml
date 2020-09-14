@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_channel.sale_channel_amazon" model="sale.channel">
+        <field name="auth_token">mySecureTokenForHook</field>
+        <field name="api_endpoint">https://www.example.com/webhooks_amazon</field>
+    </record>
+    <record id="sale_channel.sale_channel_ebay" model="sale.channel">
+        <field name="auth_token">mySecureTokenForHook2</field>
+        <field name="api_endpoint">https://www.example.com/webhooks_ebay</field>
+    </record>
+</odoo>

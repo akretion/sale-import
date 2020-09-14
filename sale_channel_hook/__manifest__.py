@@ -8,6 +8,7 @@
     "author": "Akretion",
     "website": "https://github.com/akretion/sale-import",
     "depends": ["sale_channel", "queue_job"],
+    "demo": ["demo/demo.xml"],
     "license": "AGPL-3",
     "data": ["views/sale_channel.xml"],
 }
