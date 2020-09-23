@@ -21,7 +21,7 @@ class AccountInvoice(models.Model):
             origin = rec.invoice_line_ids.mapped("sale_line_ids").mapped("order_id")
             if len(origin.ids) > 1:
                 _logger.warning("Two possible SOs detected for invoice hook")
-            if origin:
+            if origin and origin[0].sale_channel_id.hook_active_create_invoice:
                 rec.trigger_channel_hook("create_invoice", origin[0])
         return result
 

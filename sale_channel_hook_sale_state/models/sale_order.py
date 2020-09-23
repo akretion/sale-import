@@ -11,7 +11,7 @@ class SaleOrder(models.Model):
     def write(self, vals):
         result = super().write(vals)
         for rec in self:
-            if "state" in vals.keys():
+            if ("state" in vals.keys()) and rec.sale_channel_id.hook_active_sale_state:
                 rec.trigger_channel_hook("sale_state")
         return result
 

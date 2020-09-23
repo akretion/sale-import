@@ -14,7 +14,10 @@ class StockPicking(models.Model):
         return [{"number": package.name} for package in self.package_ids]
 
     def _hook_should_trigger_notif(self):
-        return self.picking_type_id in self.sale_channel_id.hook_picking_type_ids
+        must_trigger = (
+            self.picking_type_id in self.sale_channel_id.hook_picking_type_ids
+        ) and self.sale_channel_id.hook_active_delivery_done
+        return must_trigger
 
     @api.multi
     def action_done(self):
