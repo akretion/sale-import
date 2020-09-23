@@ -13,10 +13,18 @@ from odoo.addons.queue_job.job import job
 
 
 class SaleChannel(models.Model):
-    _inherit = "sale.channel"
+    _name = "sale.channel"
+    _inherit = ["sale.channel", "server.env.mixin"]
 
-    auth_token = fields.Char("Secret authentication token")  # DISCUSSION: sécurité
+    auth_token = fields.Char("Secret authentication token")
     api_endpoint = fields.Char("Hooks API endpoint")
+
+    @property
+    def _server_env_fields(self):
+        result = super()._server_env_fields
+        sale_channel_fields = {"auth_token": {}}
+        result.update(sale_channel_fields)
+        return result
 
     @job
     def send_hook_api_request(self, hook_name, content):
