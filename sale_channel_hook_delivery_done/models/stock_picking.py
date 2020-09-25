@@ -10,8 +10,8 @@ class StockPicking(models.Model):
 
     sale_channel_id = fields.Many2one("sale.channel", related="sale_id.sale_channel_id")
 
-    def _hook_format_trackings(self):
-        return [{"number": package.name} for package in self.package_ids]
+    def _prepare_hook_tracking(self, package):
+        return {"number": package.name}
 
     def _hook_should_trigger_notif(self):
         must_trigger = (
@@ -33,6 +33,8 @@ class StockPicking(models.Model):
             "sale_name": sale.name,
             "picking": self.name,
             "carrier": sale.carrier_id.name,
-            "tracking": self._hook_format_trackings(),
+            "tracking": [
+                self._prepare_hook_tracking(package) for package in self.package_ids
+            ],
         }
         return content
