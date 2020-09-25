@@ -29,7 +29,6 @@ class SaleChannel(models.Model):
 
     @job
     def send_hook_api_request(self, hook_name, content):
-        # check necessary info is filled
         if not self.api_endpoint or not self.auth_token:
             raise ValidationError(
                 _(
@@ -37,9 +36,6 @@ class SaleChannel(models.Model):
                     "endpoint to use this channel's hook"
                 )
             )
-        # check hook is activated
-        if not getattr(self, "hook_active_" + hook_name):
-            return
         url = self.api_endpoint + hook_name
         headers, payload, url = self._apply_webhook_security({}, content, url)
         response = requests.post(url, data=payload, headers=headers)
