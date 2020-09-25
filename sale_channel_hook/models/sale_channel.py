@@ -1,9 +1,6 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-import hashlib
-import hmac
-
 import requests
 
 from odoo import _, fields, models
@@ -18,6 +15,10 @@ class SaleChannel(models.Model):
 
     auth_token = fields.Char("Secret authentication token")
     api_endpoint = fields.Char("Hooks API endpoint")
+
+    def _apply_webhook_security(self, headers, payload, url):
+        """ Extend this function to customize hook security """
+        return headers, payload, url
 
     @property
     def _server_env_fields(self):
@@ -39,17 +40,8 @@ class SaleChannel(models.Model):
         # check hook is activated
         if not getattr(self, "hook_active_" + hook_name):
             return
-        payload = {content}
-        signature = self._generate_hook_request_signature(payload)
-        headers = {"X-Hub-Signature": signature}
         url = self.api_endpoint + hook_name
+        headers, payload, url = self._apply_webhook_security({}, content, url)
         response = requests.post(url, data=payload, headers=headers)
         response.raise_for_status()
         return response
-
-    def _generate_hook_request_signature(self, content):
-        secret = self.auth_token
-        signature = hmac.new(
-            secret.encode("utf-8"), content.encode("utf-8"), hashlib.sha256
-        ).hexdigest()
-        return signature
