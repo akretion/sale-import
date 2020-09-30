@@ -23,6 +23,9 @@ class SaleChannel(models.Model):
         [("none", "None"), ("basic", "Basic"), ("signature", "Signature")]
     )
 
+    def _auth_method_none(self, headers, payload, url):
+        return headers, payload, url
+
     def _auth_method_basic(self, headers, payload, url):
         """
         Add token to URL as a parameter:
@@ -55,8 +58,6 @@ class SaleChannel(models.Model):
         return headers, payload, url
 
     def _apply_webhook_security(self, headers, payload, url):
-        if self.auth_method == "none":
-            return headers, payload, url
         auth_fn_name = "_auth_" + self.auth_method
         auth_fn = getattr(self, auth_fn_name)
         return auth_fn(headers, payload, url)
