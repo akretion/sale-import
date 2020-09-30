@@ -17,7 +17,7 @@ class SaleImportOutput(Datamodel):
     chunk_ids = fields.List(fields.Integer())
 
 
-class SaleCancelImput(Datamodel):
+class SaleCancelInput(Datamodel):
     _name = "sale.cancel.input"
 
     sale_name = fields.Str()

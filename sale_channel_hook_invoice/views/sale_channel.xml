@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <data>
+        <record id="sale_channel_view_form" model="ir.ui.view">
+            <field name="model">sale.channel</field>
+            <field name="inherit_id" ref="sale_channel.sale_channel_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='hooks']" position="inside">
+                    <group>
+                        <field name="hook_active_create_invoice"/>
+                        <field name="hook_active_create_invoice_send_pdf"
+                               attrs="{'readonly': [('hook_active_create_invoice', '=', False)]}"/>
+                        <field name="hook_active_create_invoice_report"
+                               attrs="{'invisible': [('hook_active_create_invoice_send_pdf', '=', False)]}"
+                               domain="['|', ('model', '=', 'account.invoice'), ('name', 'like', 'invoice'), ('type', '=', 'qweb')]"
+                        />
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
