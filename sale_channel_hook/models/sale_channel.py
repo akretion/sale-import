@@ -1,6 +1,10 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import hashlib
+import hmac
+import json
+
 import requests
 
 from odoo import _, fields, models
@@ -15,10 +19,48 @@ class SaleChannel(models.Model):
 
     auth_token = fields.Char("Secret authentication token")
     api_endpoint = fields.Char("Hooks API endpoint")
+    auth_method = fields.Selection(
+        [("none", "None"), ("basic", "Basic"), ("signature", "Signature")]
+    )
+
+    def _auth_method_basic(self, headers, payload, url):
+        """
+        Add token to URL as a parameter:
+        Simply adds a ?<token> at the end of the url
+        """
+        url += "?token=" + self.auth_token
+        return headers, payload, url
+
+    def _generate_hook_request_signature(self, payload):
+        """
+        Use the token to sign the request:
+        - encode the secret token in utf-8
+        - use the encoded token as key when you
+        - hash the request's utf-8-encoded payload in sha256.
+        """
+        secret = self.auth_token
+        payload_str = json.dumps(payload)
+        signature = hmac.new(
+            secret.encode("utf-8"), payload_str.encode("utf-8"), hashlib.sha256
+        ).hexdigest()
+        return signature
+
+    def _auth_method_signature(self, headers, payload, url):
+        """
+        In principle, the sending side will calculate a hash using the secret token
+        and the request's contents, that hash will be used as a signature.
+        Then, the receiving side will do exactly the same calculation using the same
+         secret. If the signatures are the same, treat the request as valid.
+        """
+        headers["X-Hub-Signature"] = self._generate_hook_request_signature(payload)
+        return headers, payload, url
 
     def _apply_webhook_security(self, headers, payload, url):
-        """ Extend this function to customize hook security """
-        return headers, payload, url
+        if self.auth_method == "none":
+            return headers, payload, url
+        auth_fn_name = "_auth_" + self.auth_method
+        auth_fn = getattr(self, auth_fn_name)
+        return auth_fn(headers, payload, url)
 
     @property
     def _server_env_fields(self):
