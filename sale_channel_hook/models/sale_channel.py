@@ -39,9 +39,8 @@ class SaleChannel(models.Model):
         - hash the request's utf-8-encoded payload in sha256.
         """
         secret = self.auth_token
-        payload_str = json.dumps(payload)
         signature = hmac.new(
-            secret.encode("utf-8"), payload_str.encode("utf-8"), hashlib.sha256
+            secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256
         ).hexdigest()
         return signature
 
@@ -79,7 +78,8 @@ class SaleChannel(models.Model):
                 )
             )
         url = self.api_endpoint + hook_name
-        headers, payload, url = self._apply_webhook_security({}, content, url)
-        response = requests.post(url, data=payload, headers=headers)
+        payload = json.dumps(content)
+        headers, payload, url = self._apply_webhook_security({}, payload, url)
+        response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
         return response
