@@ -33,9 +33,7 @@ class TestSaleChannel(TestCommonSaleNoChart):
             self.headers, self.payload, self.url
         )
         signature = hmac.new(
-            b"mySecureTokenForHook",
-            payload.encode("utf-8"),
-            hashlib.sha256,
+            b"mySecureTokenForHook", payload.encode("utf-8"), hashlib.sha256
         ).hexdigest()
         self.assertEqual(headers, {"X-Hub-Signature": signature})
         self.assertEqual(payload, '{"greeting": "Hello!"}')
