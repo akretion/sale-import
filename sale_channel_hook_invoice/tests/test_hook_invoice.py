@@ -15,7 +15,7 @@ class TestHookInvoice(AccountingTestCase):
         channel.hook_active_create_invoice_send_pdf = True
         content = invoice.get_hook_content_create_invoice(
             self.env.ref("sale.sale_order_1")
-        )
+        )["data"]
         year = datetime.now().year
         self.assertEqual(content["invoice"], "INV/%s/0003" % year)
         self.assertEqual(content["sale_name"], "SO001")

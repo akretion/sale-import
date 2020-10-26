@@ -29,7 +29,7 @@ class StockPicking(models.Model):
 
     def get_hook_content_delivery_done(self, *args):
         sale = self.sale_id
-        content = {
+        data = {
             "sale_name": sale.name,
             "picking": self.name,
             "carrier": sale.carrier_id.name,
@@ -37,4 +37,4 @@ class StockPicking(models.Model):
                 self._prepare_hook_tracking(package) for package in self.package_ids
             ],
         }
-        return content
+        return {"name": "order_delivery", "data": data}

@@ -20,13 +20,13 @@ class SaleChannel(models.Model):
     auth_token = fields.Char("Secret authentication token")
     api_endpoint = fields.Char("Hooks API endpoint")
     auth_method = fields.Selection(
-        [("none", "None"), ("basic", "Basic"), ("signature", "Signature")]
+        [("none", "None"), ("url_token", "URL Token"), ("signature", "Signature")]
     )
 
     def _auth_method_none(self, headers, payload, url):
         return headers, payload, url
 
-    def _auth_method_basic(self, headers, payload, url):
+    def _auth_method_url_token(self, headers, payload, url):
         """
         Add token to URL as a parameter:
         Simply adds a ?<token> at the end of the url
@@ -70,7 +70,7 @@ class SaleChannel(models.Model):
         return result
 
     @job
-    def send_hook_api_request(self, hook_name, content):
+    def send_hook_api_request(self, content):
         if not self.api_endpoint or not self.auth_token:
             raise ValidationError(
                 _(
@@ -78,7 +78,7 @@ class SaleChannel(models.Model):
                     "endpoint to use this channel's hook"
                 )
             )
-        url = self.api_endpoint + hook_name
+        url = self.api_endpoint
         payload = json.dumps(content)
         headers, payload, url = self._apply_webhook_security({}, payload, url)
         response = requests.post(url, json=payload, headers=headers)

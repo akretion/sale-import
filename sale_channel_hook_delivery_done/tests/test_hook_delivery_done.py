@@ -45,7 +45,7 @@ class TestHookSaleDeliveryDone(TestSale):
         picking_pick.button_validate()
         picking_ship.move_lines.move_line_ids.qty_done = 1.00
         picking_ship.button_validate()
-        content = picking_ship.get_hook_content_delivery_done()
+        content = picking_ship.get_hook_content_delivery_done()["data"]
         self.assertEqual(content["sale_name"], self.sale.name)
         self.assertEqual(content["picking"], picking_ship.name)
         self.assertEqual(content["carrier"], "Normal Delivery Charges")
