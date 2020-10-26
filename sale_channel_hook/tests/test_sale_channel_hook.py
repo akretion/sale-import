@@ -16,9 +16,9 @@ class TestSaleChannel(TestCommonSaleNoChart):
         self.payload = json.dumps({"greeting": "Hello!"})
         self.headers = {}
 
-    def test_auth_basic(self):
-        self.sale_channel.auth_method = "basic"
-        headers, payload, url = self.sale_channel._auth_method_basic(
+    def test_auth_url_token(self):
+        self.sale_channel.auth_method = "url_token"
+        headers, payload, url = self.sale_channel._auth_method_url_token(
             self.headers, self.payload, self.url
         )
         self.assertEqual(headers, {})

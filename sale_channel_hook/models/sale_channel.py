@@ -20,13 +20,13 @@ class SaleChannel(models.Model):
     auth_token = fields.Char("Secret authentication token")
     api_endpoint = fields.Char("Hooks API endpoint")
     auth_method = fields.Selection(
-        [("none", "None"), ("basic", "Basic"), ("signature", "Signature")]
+        [("none", "None"), ("url_token", "URL Token"), ("signature", "Signature")]
     )
 
     def _auth_method_none(self, headers, payload, url):
         return headers, payload, url
 
-    def _auth_method_basic(self, headers, payload, url):
+    def _auth_method_url_token(self, headers, payload, url):
         """
         Add token to URL as a parameter:
         Simply adds a ?<token> at the end of the url
