@@ -10,4 +10,6 @@ class TestHookSaleState(TransactionCase):
         for state in "draft", "sent", "sale", "done", "cancel":
             sale.write({"state": state})
             expected_content = {"sale_name": sale.name, "state": sale.state}
-            self.assertEqual(expected_content, sale.get_hook_content_sale_state())
+            self.assertEqual(
+                expected_content, sale.get_hook_content_sale_state()["data"]
+            )

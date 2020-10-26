@@ -12,6 +12,8 @@ from odoo.exceptions import ValidationError
 
 from odoo.addons.queue_job.job import job
 
+CONSTANT_ROUTE_URL = "/webhook"
+
 
 class SaleChannel(models.Model):
     _name = "sale.channel"
@@ -78,7 +80,7 @@ class SaleChannel(models.Model):
                     "endpoint to use this channel's hook"
                 )
             )
-        url = self.api_endpoint + hook_name
+        url = self.api_endpoint + CONSTANT_ROUTE_URL
         payload = json.dumps(content)
         headers, payload, url = self._apply_webhook_security({}, payload, url)
         response = requests.post(url, json=payload, headers=headers)

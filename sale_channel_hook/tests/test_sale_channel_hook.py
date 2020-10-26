@@ -12,7 +12,7 @@ class TestSaleChannel(TestCommonSaleNoChart):
     def setUp(self):
         super().setUp()
         self.sale_channel = self.env.ref("sale_channel.sale_channel_amazon")
-        self.url = "https://www.example.com/webhooks/whatever"
+        self.url = "https://www.example.com/webhook/whatever"
         self.payload = json.dumps({"greeting": "Hello!"})
         self.headers = {}
 
@@ -24,7 +24,7 @@ class TestSaleChannel(TestCommonSaleNoChart):
         self.assertEqual(headers, {})
         self.assertEqual(payload, '{"greeting": "Hello!"}')
         self.assertEqual(
-            url, "https://www.example.com/webhooks/whatever?token=mySecureTokenForHook"
+            url, "https://www.example.com/webhook/whatever?token=mySecureTokenForHook"
         )
 
     def test_auth_signature(self):
@@ -37,4 +37,4 @@ class TestSaleChannel(TestCommonSaleNoChart):
         ).hexdigest()
         self.assertEqual(headers, {"X-Hub-Signature": signature})
         self.assertEqual(payload, '{"greeting": "Hello!"}')
-        self.assertEqual(url, "https://www.example.com/webhooks/whatever")
+        self.assertEqual(url, "https://www.example.com/webhook/whatever")
