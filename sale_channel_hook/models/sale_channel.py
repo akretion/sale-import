@@ -70,7 +70,7 @@ class SaleChannel(models.Model):
         return result
 
     @job
-    def send_hook_api_request(self, hook_name, content):
+    def send_hook_api_request(self, content):
         if not self.api_endpoint or not self.auth_token:
             raise ValidationError(
                 _(
