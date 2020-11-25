@@ -3,10 +3,20 @@
 
 from datetime import datetime
 
-from odoo.addons.account.tests.account_test_classes import AccountingTestCase
+from odoo import SUPERUSER_ID
+
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
-class TestHookInvoice(AccountingTestCase):
+class TestHookInvoice(AccountTestInvoicingCommon):
+    def setUp(self):
+        super().setUp()
+        # As the env.user is superuser anyways for our controllers,
+        # for now we neglect it for tests
+        superuser = self.env["res.users"].browse([SUPERUSER_ID])
+        self.env = self.env(user=superuser)
+        self.cr = self.env.cr
+
     def test_hook_create_invoice(self):
         invoice = self.env.ref("l10n_generic_coa.demo_invoice_3")
         channel = self.env.ref("sale_channel.sale_channel_amazon")
@@ -17,6 +27,7 @@ class TestHookInvoice(AccountingTestCase):
             self.env.ref("sale.sale_order_1")
         )["data"]
         year = datetime.now().year
-        self.assertEqual(content["invoice"], "INV/%s/0003" % year)
-        self.assertEqual(content["sale_name"], "SO001")
+        month = datetime.now().month
+        self.assertEqual(content["invoice"], "INV/{}/{}/0003".format(year, month))
+        self.assertEqual(content["sale_name"], "S00001")
         self.assertTrue(content["pdf"])

@@ -5,10 +5,10 @@ import hashlib
 import hmac
 import json
 
-from odoo.addons.sale.tests.test_sale_common import TestCommonSaleNoChart
+from odoo.tests.common import SavepointCase
 
 
-class TestSaleChannel(TestCommonSaleNoChart):
+class TestSaleChannel(SavepointCase):
     def setUp(self):
         super().setUp()
         self.sale_channel = self.env.ref("sale_channel.sale_channel_amazon")

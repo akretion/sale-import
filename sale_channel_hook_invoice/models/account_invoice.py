@@ -11,9 +11,9 @@ FIELDS_SIMPLE_COPY = ["name", "amount_total_signed"]
 _logger = logging.getLogger(__name__)
 
 
-class AccountInvoice(models.Model):
-    _name = "account.invoice"
-    _inherit = ["account.invoice", "sale.channel.hook.mixin"]
+class AccountMove(models.Model):
+    _name = "account.move"
+    _inherit = ["account.move", "sale.channel.hook.mixin"]
 
     def action_invoice_paid(self):
         result = super().action_invoice_paid()
@@ -26,10 +26,10 @@ class AccountInvoice(models.Model):
         return result
 
     def get_hook_content_create_invoice(self, origin):
-        data = {"sale_name": origin.name, "invoice": self.number}
+        data = {"sale_name": origin.name, "invoice": self.name}
         if self.sale_channel_id.hook_active_create_invoice_send_pdf:
             report = self.sale_channel_id.hook_active_create_invoice_report
-            pdf_bin = report.render_qweb_pdf([self.id])[0]
+            pdf_bin = report._render_qweb_pdf([self.id])[0]
             pdf_encoded = base64.b64encode(pdf_bin)
             data["pdf"] = pdf_encoded
         return {"name": "order_invoice", "data": data}

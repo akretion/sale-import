@@ -13,11 +13,11 @@
                             name="hook_active_create_invoice_send_pdf"
                             attrs="{'readonly': [('hook_active_create_invoice', '=', False)]}"
                         />
-                        <field
-                            name="hook_active_create_invoice_report"
-                            attrs="{'invisible': [('hook_active_create_invoice_send_pdf', '=', False)]}"
-                            domain="['|', ('model', '=', 'account.invoice'), ('name', 'like', 'invoice'), ('type', '=', 'qweb')]"
-                        />
+<!--                        <field--> TODO
+<!--                            name="hook_active_create_invoice_report"-->
+<!--                            attrs="{'invisible': [('hook_active_create_invoice_send_pdf', '=', False)]}"-->
+<!--                            domain="['|', ('model', '=', 'account.invoice'), ('name', 'like', 'invoice'), ('type', '=', 'qweb')]"-->
+<!--                        />-->
                     </group>
                 </xpath>
             </field>

@@ -10,8 +10,6 @@ import requests
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.queue_job.job import job
-
 
 class SaleChannel(models.Model):
     _name = "sale.channel"
@@ -69,7 +67,6 @@ class SaleChannel(models.Model):
         result.update(sale_channel_fields)
         return result
 
-    @job
     def send_hook_api_request(self, content):
         if not self.api_endpoint or not self.auth_token:
             raise ValidationError(

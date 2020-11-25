@@ -3,13 +3,13 @@
 {
     "name": "Sale Channel Hooks",
     "summary": "Adds customizable hooks to the sale channel",
-    "version": "12.0.1.0.0",
+    "version": "14.0.1.0.0",
     "category": "Generic Modules/Sale",
-    "author": "Akretion",
+    "author": "Akretion, Odoo Community Association (OCA)",
     "website": "https://github.com/akretion/sale-import",
     "depends": ["sale_channel", "queue_job", "server_environment"],
     "demo": ["demo/demo.xml"],
     "license": "AGPL-3",
     "data": ["views/sale_channel.xml"],
-    "installable": False,
+    "installable": True,
 }
