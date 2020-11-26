@@ -10,4 +10,5 @@
     "depends": ["sale_channel_hook"],
     "license": "AGPL-3",
     "data": ["views/sale_channel.xml"],
+    "installable": False,
 }

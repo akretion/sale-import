@@ -11,5 +11,5 @@
     "depends": ["sale_import_base", "delivery"],
     "license": "AGPL-3",
     "data": [],
-    "installable": True,
+    "installable": False,
 }

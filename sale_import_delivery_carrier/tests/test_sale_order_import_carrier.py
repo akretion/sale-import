@@ -74,8 +74,8 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(equal_delivery, 0)
 
     def test_deliver_country_with_tax(self):
-        """ Test fiscal position and tax is applied correctly
-        to the delivery line """
+        """Test fiscal position and tax is applied correctly
+        to the delivery line"""
         chunk_vals = self.get_chunk_vals("all")
         chunk_vals["data_str"]["address_shipping"]["country_code"] = "CH"
         del chunk_vals["data_str"]["address_shipping"]["state_code"]
@@ -86,8 +86,8 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(delivery_line.tax_id, self.tax_swiss)
 
     def test_deliver_line_name(self):
-        """ Test description is applied, or fallback on default
-         carrier description """
+        """Test description is applied, or fallback on default
+        carrier description"""
         chunk_vals1, chunk_vals2 = (
             self.get_chunk_vals("all"),
             self.get_chunk_vals("all"),
