@@ -1,7 +1,7 @@
-[![Runbot Status](https://runbot.odoo-community.org/runbot/badge/flat//13.0.svg)](https://runbot.odoo-community.org/runbot/repo/github-com-oca-sale-import-)
-[![Build Status](https://travis-ci.com/OCA/sale-import.svg?branch=13.0)](https://travis-ci.com/OCA/sale-import)
-[![codecov](https://codecov.io/gh/OCA/sale-import/branch/13.0/graph/badge.svg)](https://codecov.io/gh/OCA/sale-import)
-[![Translation Status](https://translation.odoo-community.org/widgets/sale-import-13-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/sale-import-13-0/?utm_source=widget)
+[![Runbot Status](https://runbot.odoo-community.org/runbot/badge/flat//12.0.svg)](https://runbot.odoo-community.org/runbot/repo/github-com-oca-sale-import-)
+[![Build Status](https://travis-ci.com/OCA/sale-import.svg?branch=12.0)](https://travis-ci.com/OCA/sale-import)
+[![codecov](https://codecov.io/gh/OCA/sale-import/branch/12.0/graph/badge.svg)](https://codecov.io/gh/OCA/sale-import)
+[![Translation Status](https://translation.odoo-community.org/widgets/sale-import-12-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/sale-import-13-0/?utm_source=widget)
 
 <!-- /!\ do not modify above this line -->
 
