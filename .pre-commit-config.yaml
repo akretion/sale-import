@@ -101,4 +101,3 @@ repos:
     rev: 2.5.2
     hooks:
       - id: setuptools-odoo-make-default
-
