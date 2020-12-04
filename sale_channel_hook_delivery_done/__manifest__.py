@@ -7,7 +7,7 @@
     "category": "Generic Modules/Sale",
     "author": "Akretion, Odoo Community Association (OCA)",
     "website": "https://github.com/akretion/sale-import",
-    "depends": ["sale_channel_hook", "delivery"],
+    "depends": ["sale_channel_hook", "delivery", "sale_import_base"],
     "license": "AGPL-3",
     "data": ["views/sale_channel.xml"],
     "installable": True,
