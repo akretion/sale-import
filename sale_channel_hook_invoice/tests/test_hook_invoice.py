@@ -1,7 +1,6 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-from datetime import datetime
 
 from odoo import SUPERUSER_ID
 
@@ -20,14 +19,11 @@ class TestHookInvoice(AccountTestInvoicingCommon):
     def test_hook_create_invoice(self):
         invoice = self.env.ref("l10n_generic_coa.demo_invoice_3")
         channel = self.env.ref("sale_channel.sale_channel_amazon")
+        sale = self.env.ref("sale.sale_order_1")
         invoice.sale_channel_id = channel
         channel.hook_active_create_invoice = True
         channel.hook_active_create_invoice_send_pdf = True
-        content = invoice.get_hook_content_create_invoice(
-            self.env.ref("sale.sale_order_1")
-        )["data"]
-        year = datetime.now().year
-        month = datetime.now().month
-        self.assertEqual(content["invoice"], "INV/{}/{}/0003".format(year, month))
-        self.assertEqual(content["sale_name"], "S00001")
+        content = invoice.get_hook_content_create_invoice(sale)["data"]
+        self.assertEqual(content["invoice"], invoice.name)
+        self.assertEqual(content["sale_name"], sale.name)
         self.assertTrue(content["pdf"])
