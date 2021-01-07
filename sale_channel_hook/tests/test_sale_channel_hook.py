@@ -27,6 +27,24 @@ class TestSaleChannel(SavepointCase):
             url, "https://www.example.com/whatever?token=mySecureTokenForHook"
         )
 
+    def test_apply_webhook_security_auth_method_false(self):
+        self.sale_channel.auth_method = False
+        headers, payload, url = self.sale_channel._apply_webhook_security(self.headers, self.payload, self.url)
+        self.assertEqual(headers, {})
+        self.assertEqual(payload, '{"greeting": "Hello!"}')
+        self.assertEqual(
+            url, "https://www.example.com/whatever"
+        )
+
+    def test_apply_webhook_security_url_token(self):
+        self.sale_channel.auth_method = "url_token"
+        headers, payload, url = self.sale_channel._apply_webhook_security(self.headers, self.payload, self.url)
+        self.assertEqual(headers, {})
+        self.assertEqual(payload, '{"greeting": "Hello!"}')
+        self.assertEqual(
+            url, "https://www.example.com/whatever?token=mySecureTokenForHook"
+        )
+    
     def test_auth_signature(self):
         self.sale_channel.auth_method = "signature"
         headers, payload, url = self.sale_channel._auth_method_signature(

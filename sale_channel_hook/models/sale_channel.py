@@ -56,7 +56,7 @@ class SaleChannel(models.Model):
         return headers, payload, url
 
     def _apply_webhook_security(self, headers, payload, url):
-        auth_fn_name = "_auth_" + self.auth_method
+        auth_fn_name = "_auth_method_{}".format(self.auth_method or 'none')
         auth_fn = getattr(self, auth_fn_name)
         return auth_fn(headers, payload, url)
 
