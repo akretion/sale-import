@@ -7,7 +7,10 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form" />
             <field name="arch" type="xml">
-                <xpath expr="//group[@id='other_tab_group']//field[@name='invoice_origin']" position="after">
+                <xpath
+                    expr="//group[@id='other_tab_group']//field[@name='invoice_origin']"
+                    position="after"
+                >
                     <field name="sale_channel_id" />
                 </xpath>
             </field>
