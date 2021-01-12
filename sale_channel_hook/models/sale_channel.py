@@ -63,7 +63,9 @@ class SaleChannel(models.Model):
     @property
     def _server_env_fields(self):
         result = super()._server_env_fields
-        sale_channel_fields = {"auth_token": {}}
+        sale_channel_fields = {"auth_token": {},
+                            "auth_method": {},
+                            "api_endpoint": {}}
         result.update(sale_channel_fields)
         return result
 
