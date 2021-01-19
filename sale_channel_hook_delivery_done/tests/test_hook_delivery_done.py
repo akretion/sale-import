@@ -9,7 +9,10 @@ class TestHookSaleDeliveryDone(SavepointCase):
         super().setUp()
         self.env.ref("stock.warehouse0").delivery_steps = "pick_ship"
         self.channel = self.env.ref("sale_channel.sale_channel_amazon")
-        self.channel.hook_picking_type_ids = self.env.ref("stock.picking_type_out")
+        self.channel.hook_active_delivery_done = True
+        self.channel.hook_picking_type_ids = [
+            (6, False, [self.env.ref("stock.picking_type_out").id])
+        ]
         self.sale = self.env["sale.order"].create(
             {
                 "partner_id": self.env.ref("base.res_partner_3").id,
