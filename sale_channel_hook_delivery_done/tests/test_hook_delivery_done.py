@@ -40,10 +40,10 @@ class TestHookSaleDeliveryDone(SavepointCase):
             lambda r: r.picking_type_id == self.env.ref("stock.picking_type_out")
         )
         picking_pick = self.sale.picking_ids - picking_ship
-        picking_pick.move_lines.move_line_ids.qty_done = 1.00
+        picking_pick.move_lines.quantity_done = 1.00
         picking_pick.action_put_in_pack()
         picking_pick.button_validate()
-        picking_ship.move_lines.move_line_ids.qty_done = 1.00
+        picking_ship.move_lines.quantity_done = 1.00
         picking_ship.button_validate()
         content = picking_ship.get_hook_content_delivery_done()["data"]
         self.assertEqual(content["sale_name"], self.sale.name)
