@@ -9,7 +9,10 @@ class TestHookSaleDeliveryDone(SavepointCase):
         super().setUp()
         self.env.ref("stock.warehouse0").delivery_steps = "pick_ship"
         self.channel = self.env.ref("sale_channel.sale_channel_amazon")
-        self.channel.hook_picking_type_ids = self.env.ref("stock.picking_type_out")
+        self.channel.hook_active_delivery_done = True
+        self.channel.hook_picking_type_ids = [
+            (6, False, [self.env.ref("stock.picking_type_out").id])
+        ]
         self.sale = self.env["sale.order"].create(
             {
                 "partner_id": self.env.ref("base.res_partner_3").id,
@@ -40,10 +43,10 @@ class TestHookSaleDeliveryDone(SavepointCase):
             lambda r: r.picking_type_id == self.env.ref("stock.picking_type_out")
         )
         picking_pick = self.sale.picking_ids - picking_ship
-        picking_pick.move_lines.move_line_ids.qty_done = 1.00
+        picking_pick.move_lines.quantity_done = 1.00
         picking_pick.action_put_in_pack()
         picking_pick.button_validate()
-        picking_ship.move_lines.move_line_ids.qty_done = 1.00
+        picking_ship.move_lines.quantity_done = 1.00
         picking_ship.button_validate()
         content = picking_ship.get_hook_content_delivery_done()["data"]
         self.assertEqual(content["sale_name"], self.sale.name)
