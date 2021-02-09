@@ -32,7 +32,9 @@ class TestSaleOrderImport(SaleImportCase):
 
     def setUp(self):
         super().setUp()
-        self.env.ref("delivery.product_product_delivery_normal").taxes_id = self.tax
+        self.env.ref(
+            "delivery.product_product_delivery_normal"
+        ).taxes_id = self.tax_sale_a
 
     def test_basic_all(self):
         self._helper_create_chunk(self.get_chunk_vals("all"))
@@ -69,25 +71,26 @@ class TestSaleOrderImport(SaleImportCase):
         )
         self.assertEqual(len(delivery_line.ids), 1)
         equal_delivery = float_compare(
-            delivery_line.price_total, 10.9, precision_digits=2
+            delivery_line.price_total, 11.5, precision_digits=2
         )
         self.assertEqual(equal_delivery, 0)
 
     def test_deliver_country_with_tax(self):
-        """ Test fiscal position and tax is applied correctly
-        to the delivery line """
+        """Test fiscal position and tax is applied correctly
+        to the delivery line"""
         chunk_vals = self.get_chunk_vals("all")
+        self.fiscal_pos_a.country_id = self.env.ref("base.ch")
         chunk_vals["data_str"]["address_shipping"]["country_code"] = "CH"
         del chunk_vals["data_str"]["address_shipping"]["state_code"]
         self._helper_create_chunk(chunk_vals)
         delivery_line = self.get_created_sales().order_line.filtered(
             lambda r: r.is_delivery
         )
-        self.assertEqual(delivery_line.tax_id, self.tax_swiss)
+        self.assertEqual(delivery_line.tax_id, self.tax_sale_b)
 
     def test_deliver_line_name(self):
-        """ Test description is applied, or fallback on default
-         carrier description """
+        """Test description is applied, or fallback on default
+        carrier description"""
         chunk_vals1, chunk_vals2 = (
             self.get_chunk_vals("all"),
             self.get_chunk_vals("all"),

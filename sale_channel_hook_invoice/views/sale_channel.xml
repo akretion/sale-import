@@ -16,7 +16,7 @@
                         <field
                             name="hook_active_create_invoice_report"
                             attrs="{'invisible': [('hook_active_create_invoice_send_pdf', '=', False)]}"
-                            domain="['|', ('model', '=', 'account.invoice'), ('name', 'like', 'invoice'), ('type', '=', 'qweb')]"
+                            domain="['|', ('model', '=', 'account.invoice'), ('name', 'ilike', 'invoice'), ('type', '=', 'qweb-pdf')]"
                         />
                     </group>
                 </xpath>

@@ -5,10 +5,10 @@ import hashlib
 import hmac
 import json
 
-from odoo.addons.sale.tests.test_sale_common import TestCommonSaleNoChart
+from odoo.tests.common import SavepointCase
 
 
-class TestSaleChannel(TestCommonSaleNoChart):
+class TestSaleChannel(SavepointCase):
     def setUp(self):
         super().setUp()
         self.sale_channel = self.env.ref("sale_channel.sale_channel_amazon")
@@ -19,6 +19,26 @@ class TestSaleChannel(TestCommonSaleNoChart):
     def test_auth_url_token(self):
         self.sale_channel.auth_method = "url_token"
         headers, payload, url = self.sale_channel._auth_method_url_token(
+            self.headers, self.payload, self.url
+        )
+        self.assertEqual(headers, {})
+        self.assertEqual(payload, '{"greeting": "Hello!"}')
+        self.assertEqual(
+            url, "https://www.example.com/whatever?token=mySecureTokenForHook"
+        )
+
+    def test_apply_webhook_security_auth_method_false(self):
+        self.sale_channel.auth_method = False
+        headers, payload, url = self.sale_channel._apply_webhook_security(
+            self.headers, self.payload, self.url
+        )
+        self.assertEqual(headers, {})
+        self.assertEqual(payload, '{"greeting": "Hello!"}')
+        self.assertEqual(url, "https://www.example.com/whatever")
+
+    def test_apply_webhook_security_url_token(self):
+        self.sale_channel.auth_method = "url_token"
+        headers, payload, url = self.sale_channel._apply_webhook_security(
             self.headers, self.payload, self.url
         )
         self.assertEqual(headers, {})

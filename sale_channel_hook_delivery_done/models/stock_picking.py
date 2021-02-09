@@ -1,7 +1,7 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class StockPicking(models.Model):
@@ -19,9 +19,8 @@ class StockPicking(models.Model):
         ) and self.sale_channel_id.hook_active_delivery_done
         return must_trigger
 
-    @api.multi
-    def action_done(self):
-        res = super(StockPicking, self).action_done()
+    def _action_done(self):
+        res = super(StockPicking, self)._action_done()
         for pick in self:
             if pick._hook_should_trigger_notif():
                 pick.trigger_channel_hook("delivery_done", pick)
