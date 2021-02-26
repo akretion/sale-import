@@ -3,6 +3,8 @@
 
 from odoo import models
 
+from odoo.addons.queue_job.job import identity_exact
+
 
 class StockMove(models.Model):
     _inherit = "stock.move"
@@ -11,7 +13,9 @@ class StockMove(models.Model):
         for rec in self:
             products_moved = rec.move_line_ids.mapped("product_id")
             for product in products_moved:
-                product.with_delay()._notify_stock_variation(rec.warehouse_id)
+                product.with_delay(identity_key=identity_exact)._notify_stock_variation(
+                    rec.warehouse_id
+                )
 
     def _action_cancel(self):
         result = super()._action_cancel()
