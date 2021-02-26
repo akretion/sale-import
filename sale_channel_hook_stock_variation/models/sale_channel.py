@@ -9,9 +9,3 @@ class SaleChannel(models.Model):
 
     hook_active_stock_variation = fields.Boolean("Active stock variation hook")
     warehouse_id = fields.Many2one("stock.warehouse")
-    product_product_bindings = fields.One2many(
-        "channel.product.product", "sale_channel_id"
-    )
-    product_template_bindings = fields.One2many(
-        "channel.product.template", "sale_channel_id"
-    )

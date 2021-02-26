@@ -5,31 +5,13 @@ from odoo import models
 
 
 class StockMove(models.Model):
-    _name = "stock.move"
-    _inherit = ["stock.move", "sale.channel.hook.mixin"]
+    _inherit = "stock.move"
 
     def _notify_stock_variation(self):
         for rec in self:
             products_moved = rec.move_line_ids.mapped("product_id")
-            warehouse = rec.warehouse_id
-            channels = rec.env["sale.channel"].search(
-                [
-                    ("warehouse_id", "=", warehouse.id),
-                    ("hook_active_stock_variation", "=", True),
-                ]
-            )
-            for channel in channels:
-                products_bound = channel.product_product_bindings.mapped("record_id")
-                products_to_notify = products_moved & products_bound
-                bindings = channel.product_product_bindings.filtered(
-                    lambda r: r.record_id in products_to_notify.ids
-                )
-                qty_variations = bindings._prepare_qty_variations()
-                if qty_variations:
-                    rec.trigger_channel_hook("stock_variation", products_to_notify)
-
-    def get_hook_content_stock_variation(self, product_qty_mappings):
-        return {"name": "stock_variation", "data": product_qty_mappings}
+            for product in products_moved:
+                product.with_delay()._notify_stock_variation(rec.warehouse_id)
 
     def _action_cancel(self):
         result = super()._action_cancel()
