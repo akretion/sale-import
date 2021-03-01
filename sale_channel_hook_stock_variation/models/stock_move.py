@@ -13,9 +13,9 @@ class StockMove(models.Model):
         for rec in self:
             products_moved = rec.move_line_ids.mapped("product_id")
             for product in products_moved:
-                product.with_delay(identity_key=identity_exact)._notify_stock_variation(
-                    rec.warehouse_id
-                )
+                product.with_delay(
+                    identity_key=identity_exact
+                )._notify_stock_variation()
 
     def _action_cancel(self):
         result = super()._action_cancel()
