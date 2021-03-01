@@ -15,9 +15,11 @@ class ProductProductChannel(models.Model):
 
     def _notify_stock_variation(self):
         self.ensure_one()
-        current_stock = self.record_id.with_context(
-            warehouse=self.channel_id.warehouse_id
-        ).qty_available
+        current_stock_field_name = self.channel_id.product_stock_field_id.name
+        current_stock = getattr(
+            self.record_id.with_context(warehouse=self.channel_id.warehouse_id),
+            current_stock_field_name,
+        )
         if float_compare(self.last_notification_qty, current_stock) != 0:
             self.last_notification_qty = current_stock
             self.trigger_channel_hook(
