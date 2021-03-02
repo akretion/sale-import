@@ -234,3 +234,6 @@ class TestSaleOrderImport(SaleImportCase):
         sale.transaction_ids._post_process_after_done()
         self.assertEqual(invoice.state, "posted")
         self.assertEqual(invoice.payment_state, "paid")
+
+    def test_dummy(self):
+        pass
