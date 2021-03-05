@@ -13,19 +13,23 @@ class ProductProductChannel(models.Model):
         help="Stock quantity " "when the last notification was sent"
     )
 
-    def _notify_stock_variation(self):
-        self.ensure_one()
-        current_stock_field_name = self.channel_id.product_stock_field_id.name
-        current_stock = getattr(
-            self.record_id.with_context(warehouse=self.channel_id.warehouse_id),
-            current_stock_field_name,
-        )
-        if float_compare(self.last_notification_qty, current_stock) != 0:
-            self.last_notification_qty = current_stock
-            self.trigger_channel_hook(
-                "stock_variation",
-                {"product_id": self.record_id.id, "amount": current_stock},
-            )
+    def _get_stock_level(self):
+        field_name = self.channel_id.product_stock_field_id.name
+        return record.record_id.with_context(warehouse=self.channel_id.warehouse_id)[field_name]
+    
+    def _check_stock_variation(self):
+        for record in self:
+            val = self._get_stock_level()
+            if float_compare(record.last_notification_qty, val) != 0:
+                record.with_delay(identity=identity)._notify_stock_variation()
 
+    def _notify_stock_variantion(self):
+        self.ensure_one() 
+        val = self._get_stock_level()
+        self.last_notification_qty = val
+        self.trigger_channel_hook(
+            "stock_variation",
+            {"product_id": self.record_id.id, "amount": val},
+        )
     def get_hook_content_stock_variation(self, data):
         return {"name": "stock_variation", "data": data}
