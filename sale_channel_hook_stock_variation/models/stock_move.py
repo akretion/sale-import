@@ -9,7 +9,7 @@ from odoo.addons.queue_job.job import identity_exact
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    def _notify_stock_variation(self):
+    def _check_stock_variation(self):
         for rec in self:
             products_moved = rec.move_line_ids.mapped("product_id")
             for product in products_moved:
