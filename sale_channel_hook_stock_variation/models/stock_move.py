@@ -23,7 +23,7 @@ class StockMove(models.Model):
         return result
 
     def _action_confirm(self, merge=True, merge_into=False):
-        result = super()._action_confirm(merge, merge_into)
+        result = super()._action_confirm(merge=merge, merge_into=merge_into)
         result._notify_stock_variation()
         return result
 
