@@ -28,6 +28,6 @@ class StockMove(models.Model):
         return result
 
     def _action_done(self, cancel_backorder=False):
-        result = super()._action_done(cancel_backorder)
+        result = super()._action_done(cancel_backorder=cancel_backorder)
         self._notify_stock_variation()
         return result
