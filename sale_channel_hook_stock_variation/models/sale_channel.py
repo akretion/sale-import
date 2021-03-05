@@ -14,7 +14,7 @@ class SaleChannel(models.Model):
             ("ttype", "in", ["float", "integer"]),
             ("model", "in", ["product.product", "product.template"]),
         ],
-        help="Field used to have the current stock of a product.product",
+        help="Field used to store the current stock of a product.product",
         default=lambda self: self._default_stock_field_id(),
     )
 
