@@ -35,7 +35,7 @@ class ProductProductChannel(models.Model):
             rec.last_notification_qty = val
             rec.trigger_channel_hook(
                 "stock_variation",
-                {"product_id": self.record_id.id, "amount": val},
+                {"product_id": self.record_id.id, "qty": val},
             )
 
     def get_hook_content_stock_variation(self, data):
