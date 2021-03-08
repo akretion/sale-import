@@ -24,6 +24,3 @@ class StockMove(models.Model):
         result = super()._action_done(cancel_backorder=cancel_backorder)
         self._check_stock_variation()
         return result
-
-    def write(self, vals):
-        return super().write(vals)
