@@ -19,7 +19,7 @@ class SaleChannel(models.Model):
     )
 
     def _default_stock_field_id(self):
-        return self.env.ref("stock.field_product_product__qty_available")
+        return self.env.ref("stock.field_product_product__free_qty")
 
     hook_active_stock_variation = fields.Boolean("Active stock variation hook")
     warehouse_id = fields.Many2one("stock.warehouse")
