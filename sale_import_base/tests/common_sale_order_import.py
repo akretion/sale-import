@@ -91,12 +91,21 @@ class SaleImportCase(
         cls.last_sale_id = (
             cls.env["sale.order"].search([], order="id desc", limit=1).id or 0
         )
+        cls.last_partner_id = (
+            cls.env["res.partner"].search([], order="id desc", limit=1).id or 0
+        )
 
     @classmethod
     def get_created_sales(cls):
         return cls.env["sale.order"].search(
             [("id", ">", cls.last_sale_id)], order="id desc"
         )
+
+    @classmethod
+    def get_created_partners(cls):
+        return cls.env["res.partner"].with_context(active_test=False).search(
+            [("id", ">", cls.last_partner_id)], order="id desc"
+    )
 
     @classmethod
     def setUpProducts(cls):  # TODO clear this out with TestSaleCommonNoDuplicates
