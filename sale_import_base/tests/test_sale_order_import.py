@@ -101,10 +101,9 @@ class TestSaleOrderImport(SaleImportCase):
 
     def test_import_address_versioning(self):
         """
-        - do a first import creating partner P, shipping addr. S1, invoicing addr. I1
-        - do a second import for P, with new addresses S2, I2
-        - first sale order should have P, S1, I1
-        - second sale order should have P, S2, I2
+        - Execute two imports
+        - The imports have different addresses for invoice and shipping
+        - There should different versioned addresses on the two Sale Orders
         """
         self._helper_create_chunk(self.get_chunk_vals("minimum"))
         partners_created_1 = self.get_created_partners()
@@ -127,10 +126,9 @@ class TestSaleOrderImport(SaleImportCase):
 
     def test_import_address_versioning_skipped(self):
         """
-        - do a first import creating partner P, shipping addr. S1, invoicing addr. I1
-        - do a second import for P, with existing addresses S1, I1
-        - first sale order should have P, S1, I1
-        - second sale order should have P, S1, I1
+        - Execute two imports
+        - The imports have the same addresses for invoice and shipping
+        - No versioning should be done on the invoice and shipping addresses
         """
         self._helper_create_chunk(self.get_chunk_vals("minimum"))
         partners_created_1 = self.get_created_partners()
