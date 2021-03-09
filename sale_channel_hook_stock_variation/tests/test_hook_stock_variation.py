@@ -54,30 +54,30 @@ class TestHookSaleState(SavepointCase):
         self.location = self.warehouse.lot_stock_id
         self.location_dst = self.warehouse_dst.lot_stock_id
         self._set_initial_stock_to(100.0)
-        self.picking = (
-            self.env["stock.picking"]
-            .create(
-                {
-                    "name": "Test Picking",
-                    "location_id": self.location.id,
-                    "location_dest_id": self.location_dst.id,
-                    "picking_type_id": self.env.ref("stock.picking_type_out").id,
-                    "move_lines": [
-                        (
-                            0,
-                            0,
-                            {
-                                "name": "Test Move",
-                                "product_uom_qty": 3.0,
-                                "product_id": self.product.id,
-                                "product_uom": self.product.uom_id.id,
-                            },
-                        )
-                    ],
-                }
-            )
-            .with_context(test_queue_job_no_delay=True)
-        )
+        # self.picking = (
+        #     self.env["stock.picking"]
+        #     .create(
+        #         {
+        #             "name": "Test Picking",
+        #             "location_id": self.location.id,
+        #             "location_dest_id": self.location_dst.id,
+        #             "picking_type_id": self.env.ref("stock.picking_type_out").id,
+        #             "move_lines": [
+        #                 (
+        #                     0,
+        #                     0,
+        #                     {
+        #                         "name": "Test Move",
+        #                         "product_uom_qty": 3.0,
+        #                         "product_id": self.product.id,
+        #                         "product_uom": self.product.uom_id.id,
+        #                     },
+        #                 )
+        #             ],
+        #         }
+        #     )
+        #     .with_context(test_queue_job_no_delay=True)
+        # )
 
     def test_stock_variation_done(self):
         fn_name = (
@@ -86,9 +86,18 @@ class TestHookSaleState(SavepointCase):
             ".SaleChannelHookMixin"
             ".trigger_channel_hook"
         )
-        self.picking.move_lines.quantity_done = 3.0
+        move = self.env["stock.move"].create(
+            {
+                "name": "Test Move",
+                "location_id": self.location.id,
+                "location_dest_id": self.location_dst.id,
+                "product_id": self.product.id,
+                "product_uom_qty": 3.0,
+                "product_uom": self.product.uom_id.id,
+            }
+        )
         with patch(fn_name) as mock:
-            self.picking.button_validate()
+            move._action_confirm()
             mock.assert_called_with(
                 "stock_variation", {"product_id": self.product.id, "amount": 97.0}
             )
