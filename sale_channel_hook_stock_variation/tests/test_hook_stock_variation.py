@@ -5,11 +5,22 @@ from mock import patch
 
 from odoo.tests import SavepointCase
 
+FN_NAME = (
+    "odoo.addons.sale_channel_hook"
+    ".models.sale_channel_hook_mixin"
+    ".SaleChannelHookMixin"
+    ".trigger_channel_hook"
+)
+
 
 class TestHookSaleState(SavepointCase):
-    def _set_initial_stock_to(self, qty):
-        inventory = self.env["stock.inventory"].create(
-            {"location_ids": [self.location.id], "name": "Test starting inventory"}
+    def _set_stock_to(self, qty):
+        inventory = (
+            self.env["stock.inventory"]
+            .create(
+                {"location_ids": [self.location.id], "name": "Test starting inventory"}
+            )
+            .with_context(test_queue_job_no_delay=True)
         )
         self.env["stock.inventory.line"].create(
             {
@@ -22,6 +33,21 @@ class TestHookSaleState(SavepointCase):
         )
         inventory.action_start()
         inventory.action_validate()
+
+    def _create_sale_order(self, qty):
+        sale = (
+            self.env["sale.order"]
+            .with_context(test_queue_job_no_delay=True)
+            .create({"partner_id": self.partner.id})
+        )
+        self.env["sale.order.line"].create(
+            {
+                "order_id": sale.id,
+                "product_id": self.product.id,
+                "product_uom_qty": qty,
+            }
+        )
+        return sale.with_context(test_queue_job_no_delay=True)
 
     def setUp(self):
         super().setUp()
@@ -53,8 +79,38 @@ class TestHookSaleState(SavepointCase):
         self.binding = self.binding_tmpl_id.channel_variant_ids
         self.location = self.warehouse.lot_stock_id
         self.location_dst = self.warehouse_dst.lot_stock_id
-        self._set_initial_stock_to(100.0)
-        self.picking = (
+
+    def test_inventory(self):
+        with patch(FN_NAME) as mock:
+            self._set_stock_to(100.0)
+            mock.assert_called_with(
+                "stock_variation", {"product_id": self.product.id, "qty": 100.0}
+            )
+
+    def test_sale(self):
+        with patch(FN_NAME):
+            self._set_stock_to(100.0)
+        with patch(FN_NAME) as mock:
+            sale = self._create_sale_order(25.0)
+            sale.action_confirm()
+            mock.assert_called_with(
+                "stock_variation", {"product_id": self.product.id, "qty": 75.0}
+            )
+
+    def test_sale_cancel(self):
+        with patch(FN_NAME):
+            self._set_stock_to(100.0)
+        sale = self._create_sale_order(25.0)
+        with patch(FN_NAME) as mock:
+            sale.action_cancel()
+            mock.assert_called_with(
+                "stock_variation", {"product_id": self.product.id, "qty": 100.0}
+            )
+
+    def test_picking(self):
+        with patch(FN_NAME):
+            self._set_stock_to(100.0)
+        picking = (
             self.env["stock.picking"]
             .create(
                 {
@@ -78,17 +134,9 @@ class TestHookSaleState(SavepointCase):
             )
             .with_context(test_queue_job_no_delay=True)
         )
-
-    def test_stock_variation_done(self):
-        fn_name = (
-            "odoo.addons.sale_channel_hook"
-            ".models.sale_channel_hook_mixin"
-            ".SaleChannelHookMixin"
-            ".trigger_channel_hook"
-        )
-        self.picking.move_lines.quantity_done = 3.0
-        with patch(fn_name) as mock:
-            self.picking.button_validate()
+        with patch(FN_NAME) as mock:
+            picking.move_lines.quantity_done = 3.0
+            picking.button_validate()
             mock.assert_called_with(
-                "stock_variation", {"product_id": self.product.id, "amount": 97.0}
+                "stock_variation", {"product_id": self.product.id, "qty": 97.0}
             )
