@@ -103,9 +103,11 @@ class SaleImportCase(
 
     @classmethod
     def get_created_partners(cls):
-        return cls.env["res.partner"].with_context(active_test=False).search(
-            [("id", ">", cls.last_partner_id)], order="id desc"
-    )
+        return (
+            cls.env["res.partner"]
+            .with_context(active_test=False)
+            .search([("id", ">", cls.last_partner_id)], order="id desc")
+        )
 
     @classmethod
     def setUpProducts(cls):  # TODO clear this out with TestSaleCommonNoDuplicates
