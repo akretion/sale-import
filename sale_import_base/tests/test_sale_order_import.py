@@ -99,47 +99,23 @@ class TestSaleOrderImport(SaleImportCase):
         )
         self.assertEqual(new_partner_count, partner_count + 3)
 
-    def test_import_address_versioning(self):
+    def test_import_existing_address(self):
         """
-        - Execute two imports
-        - The imports have different addresses for invoice and shipping
-        - There should different versioned addresses on the two Sale Orders
+        partner_shipping_id and partner_invoice_id should be used if
+        they already exist
         """
+        # 1st import to create the addresses
         self._helper_create_chunk(self.get_chunk_vals("minimum"))
-        partners_created_1 = self.get_created_partners()
         sale = self.get_created_sales()
-        self.assertEqual(partners_created_1[0], sale.partner_shipping_id)
-        self.assertEqual(partners_created_1[1], sale.partner_invoice_id)
-        self.assertEqual(partners_created_1[2], sale.partner_id)
-        new_addresses = self.get_chunk_vals("minimum")
-        new_addresses["data_str"]["address_shipping"][
-            "street"
-        ] = "4 new shipping address street"
-        new_addresses["data_str"]["address_invoicing"][
-            "street"
-        ] = "5 new invoice address street"
-        self._helper_create_chunk(new_addresses)
-        new_sale = self.get_created_sales() - sale
-        partners_created_2 = self.get_created_partners() - partners_created_1
-        self.assertEqual(partners_created_2[0], new_sale.partner_shipping_id)
-        self.assertEqual(partners_created_2[1], new_sale.partner_invoice_id)
-
-    def test_import_address_versioning_skipped(self):
-        """
-        - Execute two imports
-        - The imports have the same addresses for invoice and shipping
-        - No versioning should be done on the invoice and shipping addresses
-        """
-        self._helper_create_chunk(self.get_chunk_vals("minimum"))
-        partners_created_1 = self.get_created_partners()
-        sale = self.get_created_sales()
-        self.assertEqual(partners_created_1[0], sale.partner_shipping_id)
-        self.assertEqual(partners_created_1[1], sale.partner_invoice_id)
-        self.assertEqual(partners_created_1[2], sale.partner_id)
+        addresses = self.get_created_partners() - sale.partner_id
+        # 2nd import to verify
         self._helper_create_chunk(self.get_chunk_vals("minimum"))
         new_sale = self.get_created_sales() - sale
-        self.assertEqual(partners_created_1[0], new_sale.partner_shipping_id)
-        self.assertEqual(partners_created_1[1], new_sale.partner_invoice_id)
+        new_addresses = self.get_created_partners() - addresses - sale.partner_id
+        self.assertFalse(new_addresses)
+        self.assertEqual(
+            addresses, new_sale.partner_shipping_id | new_sale.partner_invoice_id
+        )
 
     def test_product_missing(self):
         """ Test product code validation effectively blocks the job """

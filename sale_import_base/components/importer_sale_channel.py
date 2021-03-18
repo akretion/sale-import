@@ -68,9 +68,9 @@ class ImporterSaleChannel(Component):
 
     def _process_partner(self, customer_data):
         """
-        Main partner:
-        - doesn't exist: create it
-        - exists: dumb update it
+        Main partner, try to find it:
+        - can't find it: create it
+        - exists: simply update it
         """
         partner = self._find_partner(customer_data)
         vals = self._prepare_partner(customer_data)
@@ -134,19 +134,14 @@ class ImporterSaleChannel(Component):
 
     def _process_address(self, partner, address, address_type):
         """
-        Shipping or invoicing addresses:
-        - doesn't exist: create it
-        - exists: version it if needed
+        For shipping or invoicing addresses, compute a preview version hash:
+        - already exists: use that versioned address
+        - doesn't exist: create a new versioned address
         """
         vals = self._prepare_partner(address)
         vals.update({"parent_id": partner.id, "type": address_type})
         addr_virtual = self.env["res.partner"].new(vals)
-        virtual_hash = addr_virtual.get_version_hash()
-        existing_address = (
-            self.env["res.partner"]
-            .with_context(active_test=False)
-            .search([("version_hash", "=", virtual_hash)])
-        )
+        existing_address = addr_virtual._version_exists()
         return existing_address or addr_virtual._version_create()
 
     def _prepare_sale_line_vals(self, data, sale_order):
