@@ -33,6 +33,7 @@ class TestHookSaleState(SavepointCase):
         )
         inventory.action_start()
         inventory.action_validate()
+        self.last_move = self.env["stock.move"].search([], order="id desc")[0]
 
     def _create_sale_order(self, qty):
         sale = (
@@ -79,6 +80,10 @@ class TestHookSaleState(SavepointCase):
         self.binding = self.binding_tmpl_id.channel_variant_ids
         self.location = self.warehouse.lot_stock_id
         self.location_dst = self.warehouse_dst.lot_stock_id
+        self.last_move = self.env["stock.move"].search([], order="id desc")[0]
+
+    def get_created_moves(self):
+        return self.env["stock.move"].search([("id", ">", self.last_move.id)])
 
     def test_inventory(self):
         with patch(FN_NAME) as mock:
@@ -100,7 +105,8 @@ class TestHookSaleState(SavepointCase):
     def test_sale_cancel(self):
         with patch(FN_NAME):
             self._set_stock_to(100.0)
-        sale = self._create_sale_order(25.0)
+            sale = self._create_sale_order(25.0)
+            sale.action_confirm()
         with patch(FN_NAME) as mock:
             sale.action_cancel()
             mock.assert_called_with(
