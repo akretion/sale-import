@@ -1,6 +1,6 @@
 odoo14-addon-base_rest_datamodel @ git+https://github.com/oca/rest-framework.git@14.0#subdirectory=setup/base_rest_datamodel
 
-odoo14-addon-partner_address_version @ git+https://github.com/oca/partner-contact.git@refs/pull/1021/head#subdirectory=setup/partner_address_version
-odoo14-addon-sale_partner_version @ git+https://github.com/oca/sale-workflow.git@refs/pull/1348/head#subdirectory=setup/sale_partner_version
+odoo14-addon-partner_address_version @ git+https://github.com/oca/partner-contact.git@refs/pull/1085/head#subdirectory=setup/partner_address_version
+odoo14-addon-sale_partner_version @ git+https://github.com/akretion/sale-workflow.git@refs/pull/22/head#subdirectory=setup/sale_partner_version
 
 odoo14-addon-sale_exception @ git+https://github.com/OCA/sale-workflow.git@refs/pull/1389/head#subdirectory=setup/sale_exception
