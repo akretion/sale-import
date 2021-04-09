@@ -41,7 +41,11 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(chunk.state, "fail")
 
     def test_create_partner(self):
-        """ Base scenario: create partner, delivery, shipping addresses"""
+        """
+        Base scenario: import Sale Order with standard data
+        -> Create partner
+        -> Create delivery, shipping addresses in inactive state
+        """
         partner_count = (
             self.env["res.partner"].with_context(active_test=False).search_count([])
         )
@@ -50,6 +54,46 @@ class TestSaleOrderImport(SaleImportCase):
             self.env["res.partner"].with_context(active_test=False).search_count([])
         )
         self.assertEqual(partner_count_after_import, partner_count + 3)
+        sale = self.get_created_sales()
+        self.assertEqual(sale.partner_shipping_id.type, "delivery")
+        self.assertEqual(sale.partner_shipping_id.active, False)
+        self.assertEqual(sale.partner_invoice_id.type, "invoice")
+        self.assertEqual(sale.partner_invoice_id.active, False)
+
+    def test_create_addresses_identical(self):
+        """
+        Test if shipping and invoice addresses are the same,
+        create only 1 res.partner for both
+        """
+        partner_count = (
+            self.env["res.partner"].with_context(active_test=False).search_count([])
+        )
+        chunk_vals = self.get_chunk_vals("minimum")
+        chunk_vals["data_str"]["address_shipping"] = chunk_vals["data_str"][
+            "address_invoicing"
+        ]
+        self._helper_create_chunk(chunk_vals)
+        new_partner_count = (
+            self.env["res.partner"].with_context(active_test=False).search_count([])
+        )
+        self.assertEqual(new_partner_count, partner_count + 2)
+
+    def test_create_addresses_multiple_times(self):
+        """
+        Test new invoice and shipping addresses are created
+        during every import
+        """
+        partner_count = (
+            self.env["res.partner"].with_context(active_test=False).search_count([])
+        )
+        self._helper_create_chunk(self.get_chunk_vals("minimum"))
+        self._helper_create_chunk(self.get_chunk_vals("minimum"))
+        new_partner_count = (
+            self.env["res.partner"].with_context(active_test=False).search_count([])
+        )
+        # 3 for 1st SO (partner + shipping + invoice)
+        # + 2 (shipping + invoice) for 2nd SO
+        self.assertEqual(new_partner_count, partner_count + 5)
 
     def test_binding_created(self):
         """ When we create a partner, a binding is created """
