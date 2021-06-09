@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+<odoo>
+
+        <record id="sale_channel_view_form" model="ir.ui.view">
+            <field name="model">sale.channel</field>
+            <field name="inherit_id" ref="sale_channel.sale_channel_view_form" />
+            <field name="arch" type="xml">
+                <field name="partner_id" position="attributes">
+                    <attribute
+                    name="attrs"
+                >{'required': [('is_white_label', '=', True)]}</attribute>
+                </field>
+                <field name="partner_id" position="after">
+                    <field name="is_white_label" />
+                </field>
+            </field>
+        </record>
+
+</odoo>
