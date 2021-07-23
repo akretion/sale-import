@@ -61,5 +61,5 @@ class TestHookSaleDeliveryDone(SavepointCase):
 
     def test_hook_delivery_done_native(self):
         self.channel.internal_naming_method = "name"
-        content, _ = self._get_picking_content_content()
+        content, _ = self._get_picking_content()
         self.assertEqual(content["sale_name"], self.sale.name)
