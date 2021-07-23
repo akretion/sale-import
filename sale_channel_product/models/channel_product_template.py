@@ -17,7 +17,7 @@ class ProductTemplateChannel(models.Model):
         "channel.product.product", "channel_product_template_id", "Channel Variant"
     )
     active = fields.Boolean(default=True, inverse="_inverse_active")
-    channel_id = fields.Many2one("sale.channel", required=True)
+    sale_channel_id = fields.Many2one("sale.channel", required=True)
 
     def _inverse_active(self):
         # TODO FIXME
