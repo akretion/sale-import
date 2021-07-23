@@ -26,7 +26,7 @@ class AccountMove(models.Model):
         return result
 
     def get_hook_content_create_invoice(self, origin):
-        data = {"sale_name": origin.name, "invoice": self.name}
+        data = {"sale_name": origin.client_order_ref, "invoice": self.name}
         if self.sale_channel_id.hook_active_create_invoice_send_pdf:
             report = self.sale_channel_id.hook_active_create_invoice_report
             pdf_bin = report._render_qweb_pdf([self.id])[0]

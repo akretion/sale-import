@@ -25,5 +25,5 @@ class TestHookInvoice(AccountTestInvoicingCommon):
         channel.hook_active_create_invoice_send_pdf = True
         content = invoice.get_hook_content_create_invoice(sale)["data"]
         self.assertEqual(content["invoice"], invoice.name)
-        self.assertEqual(content["sale_name"], sale.name)
+        self.assertEqual(content["sale_name"], sale.client_order_ref)
         self.assertTrue(content["pdf"])

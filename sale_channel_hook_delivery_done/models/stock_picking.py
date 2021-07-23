@@ -29,7 +29,7 @@ class StockPicking(models.Model):
     def get_hook_content_delivery_done(self, *args):
         sale = self.sale_id
         data = {
-            "sale_name": sale.name,
+            "sale_name": sale.client_order_ref,
             "picking": self.name,
             "carrier": sale.carrier_id.name,
             "tracking": [

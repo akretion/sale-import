@@ -16,5 +16,5 @@ class SaleOrder(models.Model):
         return result
 
     def get_hook_content_sale_state(self, *args):
-        data = {"sale_name": self.name, "state": self.state}
+        data = {"sale_name": self.client_order_ref, "state": self.state}
         return {"name": "order_state", "data": data}
