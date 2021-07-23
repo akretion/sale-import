@@ -69,6 +69,7 @@ class TestHookSaleState(SavepointCase):
         self.partner = self.env.ref("base.res_partner_4")
         self.product = self.env.ref("product.product_product_4")
         self.product.type = "product"
+        self.product.default_code = "PRODUCTCODE"
         self.channel = self.env.ref("sale_channel.sale_channel_amazon")
         self.channel.warehouse_id = self.warehouse
         self.binding_tmpl_id = self.env["channel.product.template"].create(
@@ -89,7 +90,7 @@ class TestHookSaleState(SavepointCase):
         with patch(FN_NAME) as mock:
             self._set_stock_to(100.0)
             mock.assert_called_with(
-                "stock_variation", {"product_id": self.product.id, "qty": 100.0}
+                "stock_variation", {"product_code": "PRODUCTCODE", "qty": 100.0}
             )
 
     def test_sale(self):
@@ -99,7 +100,7 @@ class TestHookSaleState(SavepointCase):
             sale = self._create_sale_order(25.0)
             sale.action_confirm()
             mock.assert_called_with(
-                "stock_variation", {"product_id": self.product.id, "qty": 75.0}
+                "stock_variation", {"product_code": "PRODUCTCODE", "qty": 75.0}
             )
 
     def test_sale_cancel(self):
@@ -110,7 +111,7 @@ class TestHookSaleState(SavepointCase):
         with patch(FN_NAME) as mock:
             sale.action_cancel()
             mock.assert_called_with(
-                "stock_variation", {"product_id": self.product.id, "qty": 100.0}
+                "stock_variation", {"product_code": "PRODUCTCODE", "qty": 100.0}
             )
 
     def test_picking(self):
@@ -144,5 +145,5 @@ class TestHookSaleState(SavepointCase):
             picking.move_lines.quantity_done = 3.0
             picking.button_validate()
             mock.assert_called_with(
-                "stock_variation", {"product_id": self.product.id, "qty": 97.0}
+                "stock_variation", {"product_code": "PRODUCTCODE", "qty": 97.0}
             )
