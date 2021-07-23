@@ -1,5 +1,7 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
+from odoo import _
+from odoo.exceptions import ValidationError
 from odoo.tools import float_compare
 
 from odoo.addons.component.core import Component
@@ -15,6 +17,8 @@ class ImporterSaleChannel(Component):
         carrier_id = self.env["delivery.carrier"].search(
             [("name", "=", data["delivery_carrier"]["name"])]
         )
+        if not carrier_id:
+            raise ValidationError(_("Couldn't find a carrier with given name"))
         vals.update({"carrier_id": carrier_id.id})
         return vals
 
