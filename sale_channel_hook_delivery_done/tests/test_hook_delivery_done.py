@@ -58,8 +58,3 @@ class TestHookSaleDeliveryDone(SavepointCase):
         self.assertEqual(content["carrier"], "Normal Delivery Charges")
         expected_tracking = [{"number": picking_ship.package_ids.name}]
         self.assertEqual(content["tracking"], expected_tracking)
-
-    def test_hook_delivery_done_native(self):
-        self.channel.internal_naming_method = "name"
-        content, _ = self._get_picking_content()
-        self.assertEqual(content["sale_name"], self.sale.name)
