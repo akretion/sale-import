@@ -47,6 +47,18 @@ class TestSaleChannel(SavepointCase):
             url, "https://www.example.com/whatever?token=mySecureTokenForHook"
         )
 
+    def test_apply_webhook_security_url_token_args(self):
+        self.sale_channel.auth_method = "url_token"
+        self.url = "https://www.example.com/whatever?arg1=123&arg2=567"
+        headers, payload, url = self.sale_channel._apply_webhook_security(
+            self.headers, self.payload, self.url
+        )
+        self.assertEqual(
+            url,
+            "https://www.example.com/"
+            "whatever?arg1=123&arg2=567&token=mySecureTokenForHook",
+        )
+
     def test_auth_signature(self):
         self.sale_channel.auth_method = "signature"
         headers, payload, url = self.sale_channel._auth_method_signature(
