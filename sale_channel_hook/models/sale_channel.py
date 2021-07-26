@@ -4,6 +4,7 @@
 import hashlib
 import hmac
 import json
+import urllib
 
 import requests
 
@@ -27,10 +28,17 @@ class SaleChannel(models.Model):
     def _auth_method_url_token(self, headers, payload, url):
         """
         Add token to URL as a parameter:
-        Simply adds a ?<token> at the end of the url
+        Parse an URL, add the "token" arguments to it,
+        while preserving all other request data
         """
-        url += "?token=" + self.auth_token
-        return headers, payload, url
+        urlparse = urllib.parse.urlparse(url)
+        query = urlparse.query
+        if query:
+            query += "&"
+        query += "token=" + self.auth_token
+        urlparse_updated_query = urlparse._replace(query=query)
+        url_updated = urllib.parse.urlunparse(urlparse_updated_query)
+        return headers, payload, url_updated
 
     def _generate_hook_request_signature(self, payload):
         """
