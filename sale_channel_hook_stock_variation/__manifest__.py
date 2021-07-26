@@ -11,6 +11,6 @@
     "application": False,
     "installable": True,
     "depends": ["sale_channel_hook", "sale_channel_product", "stock"],
-    "data": [],
+    "data": ["views/sale_channel.xml"],
     "demo": [],
 }
