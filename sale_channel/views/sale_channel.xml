@@ -35,7 +35,7 @@
         </record>
 
         <record id="sale_channel_view_search" model="ir.ui.view">
-            <field name="model">stock.warehouse</field>
+            <field name="model">sale.channel</field>
             <field name="arch" type="xml">
                 <search string="Sale Channels">
                     <field name="name" />

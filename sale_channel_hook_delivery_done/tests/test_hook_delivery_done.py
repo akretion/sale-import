@@ -5,6 +5,22 @@ from odoo.tests.common import SavepointCase
 
 
 class TestHookSaleDeliveryDone(SavepointCase):
+    def _get_picking_content(self):
+        self.sale.action_confirm()
+        for el in self.sale.picking_ids:
+            el.action_confirm()
+        picking_ship = self.sale.picking_ids.filtered(
+            lambda r: r.picking_type_id == self.env.ref("stock.picking_type_out")
+        )
+        picking_pick = self.sale.picking_ids - picking_ship
+        picking_pick.move_lines.quantity_done = 1.00
+        picking_pick.action_put_in_pack()
+        picking_pick.button_validate()
+        picking_ship.move_lines.quantity_done = 1.00
+        picking_ship.button_validate()
+        content = picking_ship.get_hook_content_delivery_done()["data"]
+        return (content, picking_ship)
+
     def setUp(self):
         super().setUp()
         self.env.ref("stock.warehouse0").delivery_steps = "pick_ship"
@@ -36,20 +52,8 @@ class TestHookSaleDeliveryDone(SavepointCase):
         """
         Create SO, mark pickings as delivered
         """
-        self.sale.action_confirm()
-        for el in self.sale.picking_ids:
-            el.action_confirm()
-        picking_ship = self.sale.picking_ids.filtered(
-            lambda r: r.picking_type_id == self.env.ref("stock.picking_type_out")
-        )
-        picking_pick = self.sale.picking_ids - picking_ship
-        picking_pick.move_lines.quantity_done = 1.00
-        picking_pick.action_put_in_pack()
-        picking_pick.button_validate()
-        picking_ship.move_lines.quantity_done = 1.00
-        picking_ship.button_validate()
-        content = picking_ship.get_hook_content_delivery_done()["data"]
-        self.assertEqual(content["sale_name"], self.sale.name)
+        content, picking_ship = self._get_picking_content()
+        self.assertEqual(content["sale_name"], self.sale.client_order_ref)
         self.assertEqual(content["picking"], picking_ship.name)
         self.assertEqual(content["carrier"], "Normal Delivery Charges")
         expected_tracking = [{"number": picking_ship.package_ids.name}]
