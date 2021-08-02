@@ -11,14 +11,14 @@ class TestSaleOrderImport(SaleImportCase):
     def patch_vals_carrier(cls, chunk_vals, which_data):
         if which_data in ("all"):
             chunk_vals["data_str"]["delivery_carrier"] = {
-                "name": "Normal Delivery Charges",
+                "name": "NDC",
                 "price_unit": 10.0,
                 "discount": 0.0,
                 "description": "CustomDescription",
             }
         elif which_data in ("mixed", "minimum"):
             chunk_vals["data_str"]["delivery_carrier"] = {
-                "name": "Normal Delivery Charges",
+                "name": "NDC",
                 "price_unit": 10.0,
             }
         else:
@@ -35,6 +35,7 @@ class TestSaleOrderImport(SaleImportCase):
         self.env.ref(
             "delivery.product_product_delivery_normal"
         ).taxes_id = self.tax_sale_a
+        self.env.ref("delivery.normal_delivery_carrier").code = "NDC"
 
     def test_basic_all(self):
         self._helper_create_chunk(self.get_chunk_vals("all"))
