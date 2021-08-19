@@ -63,7 +63,7 @@ class QueueJobChunk(models.Model):
 
     def write(self, vals):
         self._reformat_data_str(vals)
-        super().write(vals)
+        return super().write(vals)
 
     def _reformat_data_str(self, vals):
         if "data_str" in vals:
