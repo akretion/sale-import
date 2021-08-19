@@ -1,6 +1,8 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import json
+
 from odoo import api, fields, models
 
 # Use to bypass chunks entirely for easier debugging
@@ -52,10 +54,24 @@ class QueueJobChunk(models.Model):
 
     @api.model_create_multi
     def create(self, vals):
+        for vals_one in vals:
+            self._reformat_data_str(vals_one)
         result = super().create(vals)
         for rec in result:
             rec.enqueue_job()
         return result
+
+    def write(self, vals):
+        self._reformat_data_str(vals)
+        super().write(vals)
+
+    def _reformat_data_str(self, vals):
+        if "data_str" in vals:
+            data_str_raw = vals["data_str"]
+            try:
+                vals["data_str"] = json.dumps(json.loads(data_str_raw), indent=2)
+            except json.decoder.JSONDecodeError:
+                pass
 
     def button_retry(self):
         self.enqueue_job()
