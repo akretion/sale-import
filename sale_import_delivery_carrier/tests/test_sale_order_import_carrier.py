@@ -11,14 +11,14 @@ class TestSaleOrderImport(SaleImportCase):
     def patch_vals_carrier(cls, chunk_vals, which_data):
         if which_data in ("all"):
             chunk_vals["data_str"]["delivery_carrier"] = {
-                "name": "NDC",
+                "code": "NDC",
                 "price_unit": 10.0,
                 "discount": 0.0,
                 "description": "CustomDescription",
             }
         elif which_data in ("mixed", "minimum"):
             chunk_vals["data_str"]["delivery_carrier"] = {
-                "name": "NDC",
+                "code": "NDC",
                 "price_unit": 10.0,
             }
         else:
