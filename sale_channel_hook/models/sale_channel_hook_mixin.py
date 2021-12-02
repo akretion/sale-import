@@ -6,8 +6,7 @@ from odoo import models
 
 class SaleChannelHookMixin(models.AbstractModel):
     _name = "sale.channel.hook.mixin"
-    _inherit = "server.env.mixin"
-    _description = "sale channel with server env"
+    _description = "Mixin for models triggering sale channel hooks"
 
     def trigger_channel_hook(self, hook_name, *args):
         for rec in self:
