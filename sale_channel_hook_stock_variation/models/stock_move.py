@@ -8,7 +8,7 @@ class StockMove(models.Model):
     _inherit = "stock.move"
 
     def _check_stock_variation(self):
-        self.product_id.channel_bind_ids._check_stock_variation()
+        self.sudo().product_id.channel_bind_ids._check_stock_variation()
 
     def _action_cancel(self):
         result = super()._action_cancel()
