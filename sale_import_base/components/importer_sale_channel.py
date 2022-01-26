@@ -27,6 +27,9 @@ class ImporterSaleChannel(Component):
         sale_order = self.env["sale.order"].create(so_vals)
         so_line_vals = self._prepare_sale_line_vals(data, sale_order)
         self.env["sale.order.line"].create(so_line_vals)
+        amount_global_discount = data.get("amount", {}).get("amount_global_discount", 0)
+        if amount_global_discount:
+            sale_order.global_discount_amount = amount_global_discount
         self._finalize(sale_order, data)
         return sale_order
 
