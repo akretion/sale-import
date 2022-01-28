@@ -23,7 +23,7 @@ class ProductProductChannel(models.Model):
 
     def _check_stock_variation(self):
         for rec in self:
-            val = self._get_stock_level()
+            val = rec._get_stock_level()
             if float_compare(rec.last_notification_qty, val, precision_digits=2) != 0:
                 rec.with_delay(
                     identity_key=identity_exact
