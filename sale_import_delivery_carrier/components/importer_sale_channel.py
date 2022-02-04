@@ -15,10 +15,10 @@ class ImporterSaleChannel(Component):
         if not data.get("delivery_carrier"):
             return vals
         carrier_id = self.env["delivery.carrier"].search(
-            [("name", "=", data["delivery_carrier"]["name"])]
+            [("code", "=", data["delivery_carrier"]["code"])]
         )
         if not carrier_id:
-            raise ValidationError(_("Couldn't find a carrier with given name"))
+            raise ValidationError(_("Couldn't find a carrier with given code"))
         vals.update({"carrier_id": carrier_id.id})
         return vals
 
@@ -36,7 +36,7 @@ class ImporterSaleChannel(Component):
         if not data.get("delivery_carrier") or no_delivery_charges == 0:
             return
         delivery_carrier = self.env["delivery.carrier"].search(
-            [("name", "=", data["delivery_carrier"]["name"])]
+            [("code", "=", data["delivery_carrier"]["code"])]
         )
         partner = sale_order.partner_id
         carrier_with_partner_lang = delivery_carrier.with_context(lang=partner.lang)

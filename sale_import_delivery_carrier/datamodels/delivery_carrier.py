@@ -8,7 +8,7 @@ from odoo.addons.datamodel.core import Datamodel
 class DeliveryCarrierDatamodel(Datamodel):
     _name = "delivery.carrier"
 
-    name = fields.Str(required=True)
+    code = fields.Str(required=True)
     price_unit = fields.Decimal(required=True)
     discount = fields.Decimal()
     description = fields.Str()
