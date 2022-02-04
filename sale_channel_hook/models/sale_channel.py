@@ -3,7 +3,6 @@
 
 import hashlib
 import hmac
-import json
 import urllib
 
 import requests
@@ -84,7 +83,7 @@ class SaleChannel(models.Model):
                 )
             )
         url = self.api_endpoint
-        payload = json.dumps(content)
+        payload = content
         headers, payload, url = self._apply_webhook_security({}, payload, url)
         response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()

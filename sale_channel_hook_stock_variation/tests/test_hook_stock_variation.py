@@ -72,6 +72,7 @@ class TestHookSaleState(SavepointCase):
         self.product.default_code = "PRODUCTCODE"
         self.channel = self.env.ref("sale_channel.sale_channel_amazon")
         self.channel.warehouse_id = self.warehouse
+        self.channel.hook_active_stock_variation = True
         self.binding_tmpl_id = self.env["channel.product.template"].create(
             {
                 "record_id": self.product.product_tmpl_id.id,
@@ -92,6 +93,12 @@ class TestHookSaleState(SavepointCase):
             mock.assert_called_with(
                 "stock_variation", {"product_code": "PRODUCTCODE", "qty": 100.0}
             )
+
+    def test_inventory_no_active_hook(self):
+        self.channel.hook_active_stock_variation = False
+        with patch(FN_NAME) as mock:
+            self._set_stock_to(100.0)
+            self.assertEqual(mock.call_count, 0)
 
     def test_sale(self):
         with patch(FN_NAME):
