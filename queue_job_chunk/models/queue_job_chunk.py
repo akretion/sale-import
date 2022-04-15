@@ -1,6 +1,8 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import traceback
+
 from odoo import api, fields, models
 
 # Use to bypass chunks entirely for easier debugging
@@ -49,6 +51,7 @@ class QueueJobChunk(models.Model):
         store=True,
     )
     company_id = fields.Many2one("res.company", compute=_compute_reference, store=True)
+    stack_trace = fields.Text("Stack trace")
 
     @api.model_create_multi
     def create(self, vals):
@@ -86,6 +89,7 @@ class QueueJobChunk(models.Model):
                 except Exception as e:
                     self.state = "fail"
                     self.state_info = type(e).__name__ + str(e.args)
+                    self.stack_trace = traceback.format_exc()
                     return False
                 self.state_info = ""
                 self.state = "done"
