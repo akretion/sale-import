@@ -2,9 +2,12 @@
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 
+from odoo.tests import tagged
+
 from odoo.addons.component.tests.common import TransactionComponentCase
 
 
+@tagged("post_install", "-at_install")
 class TestQueueJobChunk(TransactionComponentCase):
     def setUp(self):
         super().setUp()
