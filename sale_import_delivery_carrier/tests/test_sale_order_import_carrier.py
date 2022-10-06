@@ -1,11 +1,13 @@
 #  Copyright (c) Akretion 2020
 #  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+from odoo.tests import tagged
 from odoo.tools import float_compare
 
 from odoo.addons.sale_import_base.tests.common_sale_order_import import SaleImportCase
 
 
+@tagged("-at_install", "post_install")
 class TestSaleOrderImport(SaleImportCase):
     @classmethod
     def patch_vals_carrier(cls, chunk_vals, which_data):
@@ -47,7 +49,7 @@ class TestSaleOrderImport(SaleImportCase):
         self._helper_create_chunk(self.get_chunk_vals("minimum"))
 
     def test_delivery_carrier_id(self):
-        """ Test sale order has the correct delivery carrier """
+        """Test sale order has the correct delivery carrier"""
         self._helper_create_chunk(self.get_chunk_vals("all"))
         self.assertEqual(
             self.get_created_sales().carrier_id,
@@ -55,7 +57,7 @@ class TestSaleOrderImport(SaleImportCase):
         )
 
     def test_delivery_empty_charges(self):
-        """ Test when total delivery price == 0, no line is created """
+        """Test when total delivery price == 0, no line is created"""
         vals = self.get_chunk_vals("all")
         vals["data_str"]["delivery_carrier"]["price_unit"] = 0.00
         self._helper_create_chunk(vals)
@@ -65,7 +67,7 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(len(delivery_line.ids), 0)
 
     def test_delivery_carrier_charges_applied(self):
-        """ Test delivery line is created with correct amount """
+        """Test delivery line is created with correct amount"""
         self._helper_create_chunk(self.get_chunk_vals("all"))
         delivery_line = self.get_created_sales().order_line.filtered(
             lambda r: r.is_delivery
