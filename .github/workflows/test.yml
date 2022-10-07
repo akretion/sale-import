@@ -17,8 +17,15 @@ jobs:
       matrix:
         include:
           - container: ghcr.io/oca/oca-ci/py3.6-odoo14.0:latest
+            include: "sale_import_delivery_carrier"
             makepot: "true"
           - container: ghcr.io/oca/oca-ci/py3.6-ocb14.0:latest
+            include: "sale_import_delivery_carrier"
+          - container: ghcr.io/oca/oca-ci/py3.6-odoo14.0:latest
+            exclude: "sale_import_delivery_carrier"
+            makepot: "true"
+          - container: ghcr.io/oca/oca-ci/py3.6-ocb14.0:latest
+            exclude: "sale_import_delivery_carrier"
     services:
       postgres:
         image: postgres:9.6
@@ -30,6 +37,8 @@ jobs:
           - 5432:5432
     env:
       PIP_EXTRA_INDEX_URL: "https://wheelhouse.shopinvader.com/simple/"
+      INCLUDE: "${{ matrix.include }}"
+      EXCLUDE: "${{ matrix.exclude }}"
     steps:
       - uses: actions/checkout@v2
         with:
