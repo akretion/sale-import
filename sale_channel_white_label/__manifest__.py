@@ -12,5 +12,8 @@
     "data": [
         "views/sale_channel.xml",
     ],
+    "demo": [
+        "demo/sale_channel.xml",
+    ],
     "installable": True,
 }

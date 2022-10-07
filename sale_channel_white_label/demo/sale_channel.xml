@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <record id="sale_channel_white_label" model="sale.channel">
+        <field name="name">White Label Channel</field>
+        <field name="is_white_label" eval="True" />
+    </record>
+</odoo>
