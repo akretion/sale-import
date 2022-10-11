@@ -21,10 +21,14 @@ class ProductProductChannel(models.Model):
             warehouse=self.sale_channel_id.warehouse_id.id
         )[field_name]
 
-    def _check_stock_variation(self):
+    def _check_stock_variation(self, force=False):
         for rec in self:
             val = rec._get_stock_level()
-            if float_compare(rec.last_notification_qty, val, precision_digits=2) != 0:
+            if (
+                force
+                or float_compare(rec.last_notification_qty, val, precision_digits=2)
+                != 0
+            ):
                 rec.with_delay(
                     identity_key=identity_exact
                 )._notify_channel_stock_variation()
