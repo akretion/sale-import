@@ -1,5 +1,5 @@
 #  Copyright (c) Akretion 2020
-#  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
+#  License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 {
     "name": "Sale Channel Hooks",
     "summary": "Adds customizable hooks to the sale channel",

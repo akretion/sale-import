@@ -1,5 +1,5 @@
 #  Copyright (c) Akretion 2020
-#  License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
+#  License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 {
     "name": "Sale Channel Invoice hook",
     "summary": "Adds a hook for when a sale order emits an invoice",
