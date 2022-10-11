@@ -99,6 +99,8 @@ class TestSaleOrderImport(SaleImportCase):
             self.get_chunk_vals("all"),
         )
         chunk_vals2["data_str"]["payment"]["reference"] = "PMT-EXAPLE-002"
+        # avoid duplicate problem
+        chunk_vals2["data_str"]["name"] = "XX-002"
         del chunk_vals2["data_str"]["delivery_carrier"]["description"]
         self._helper_create_chunk(chunk_vals1)
         delivery_line = self.get_created_sales().order_line.filtered(
