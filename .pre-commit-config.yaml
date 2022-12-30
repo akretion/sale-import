@@ -1,7 +1,6 @@
 exclude: |
   (?x)
   # NOT INSTALLABLE ADDONS
-  ^queue_job_chunk/|
   ^sale_channel_hook/|
   ^sale_channel_hook_delivery_done/|
   ^sale_channel_hook_invoice/|
