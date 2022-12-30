@@ -6,7 +6,6 @@ exclude: |
   ^sale_channel_hook_invoice/|
   ^sale_channel_hook_sale_state/|
   ^sale_channel_hook_stock_variation/|
-  ^sale_channel_partner/|
   ^sale_channel_product/|
   ^sale_channel_white_label/|
   ^sale_import_base/|
