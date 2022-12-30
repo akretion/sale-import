@@ -5,7 +5,7 @@
 {
     "name": "Sale Channel Product",
     "summary": "Link Product with sale channel",
-    "version": "14.0.1.0.0",
+    "version": "16.0.1.0.0",
     "category": "Sale Channel",
     "website": "https://github.com/OCA/sale-channel",
     "author": "Akretion,Odoo Community Association (OCA)",
@@ -20,9 +20,7 @@
         "sale_channel",
     ],
     "data": [
-        "views/channel_product_template_view.xml",
         "views/product_template_view.xml",
-        "security/ir.model.access.csv",
     ],
     "demo": [],
 }

@@ -1,5 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_channel.product.template_read,channel.product.template.read,model_channel_product_template,base.group_user,1,0,0,0
-access_channel.product.product_read,channel.product.product.read,model_channel_product_product,base.group_user,1,0,0,0
-access_product_template_manager,channel.product.template.manager,model_channel_product_template,sales_team.group_sale_manager,1,1,1,1
-access_product_product_manager,channel.product.product.manager,model_channel_product_product,sales_team.group_sale_manager,1,1,1,1

@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="/form/sheet/notebook" position="inside">
                 <page name="sale_channel" string="Sale Channel">
-                    <field name="channel_bind_ids" />
+                    <field name="channel_ids" />
                 </page>
             </xpath>
         </field>
