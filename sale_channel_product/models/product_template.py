@@ -14,3 +14,8 @@ class ProductTemplate(models.Model):
         string="Channel Binding",
         context={"active_test": False},
     )
+
+    def _create_variant_ids(self):
+        res = super()._create_variant_ids()
+        self.channel_bind_ids._create_missing_channel_product_product()
+        return res
