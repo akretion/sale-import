@@ -1,2 +1,6 @@
 odoo_test_helper
 mock
+
+odoo-addon-sale-exception @ git+https://github.com/OCA/sale-workflow@refs/pull/2266/head#subdirectory=setup/sale_exception
+odoo-addon-endpoint-route-handler @ git+https://github.com/acsone/web-api.git@16.0-mig-endpoint_route_handler#subdirectory=setup/endpoint_route_handler
+odoo-addon-fastapi @ git+https://github.com/OCA/rest-framework.git@refs/pull/291/head#subdirectory=setup/fastapi
