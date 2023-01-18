@@ -1,14 +1,12 @@
 #  Copyright (c) Akretion 2020
 #  License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
-from odoo import _
+from odoo import _, models
 from odoo.exceptions import ValidationError
 from odoo.tools import float_compare
 
-from odoo.addons.component.core import Component
 
-
-class ImporterSaleChannel(Component):
-    _inherit = "importer.sale.channel"
+class SaleChannelImporter(models.TransientModel):
+    _inherit = "sale.channel.importer"
 
     def _prepare_sale_vals(self, data):
         vals = super()._prepare_sale_vals(data)
@@ -50,7 +48,7 @@ class ImporterSaleChannel(Component):
                 )
             else:
                 description = carrier_with_partner_lang.name
-        vals = {
+        return {
             "name": description,
             "product_uom_qty": 1,
             "product_uom": delivery_carrier.product_id.uom_id.id,
@@ -60,4 +58,3 @@ class ImporterSaleChannel(Component):
             "is_delivery": True,
             "order_id": sale_order.id,
         }
-        return self.env["sale.order.line"].play_onchanges(vals, ["product_id"])
