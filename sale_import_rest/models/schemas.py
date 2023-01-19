@@ -5,15 +5,14 @@
 
 from typing import List
 
-from extendable_pydantic import ExtendableModelMeta
 from pydantic import BaseModel  # pylint: disable=missing-manifest-dependency
 
 from odoo.addons.sale_import_base.models.schemas import SaleOrder
 
 
-class SaleImportInput(BaseModel, metaclass=ExtendableModelMeta):
+class SaleImportInput(BaseModel):
     sale_orders: List[SaleOrder]
 
 
-class SaleCancelInput(BaseModel, metaclass=ExtendableModelMeta):
+class SaleCancelInput(BaseModel):
     sale_name: str
