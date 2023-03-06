@@ -1,16 +1,25 @@
 # Do NOT update manually; changes here will be overwritten by Copier
-_commit: v1.1.1
-_src_path: git+https://github.com/akretion/akretion-addons-repo-template
-black_version: 20.8b1
+_commit: v1.14.2
+_src_path: https://github.com/oca/oca-addons-repo-template.git
+ci: GitHub
 dependency_installation_mode: PIP
 generate_requirements_txt: true
+github_check_license: false
+github_ci_extra_env: {}
+github_enable_codecov: true
+github_enable_makepot: false
+github_enable_stale_action: false
+github_enforce_dev_status_compatibility: false
 include_wkhtmltopdf: false
-odoo_version: '14.0'
-prettify_xml: true
-python_line_length: 88
-rebel_module_groups: []
+odoo_version: 14.0
+org_name: Akretion
+org_slug: akretion
+rebel_module_groups:
+- sale_import_delivery_carrier
 repo_description: Set of modules to manage Sale Order imports through a JSON API
 repo_name: sale-import
 repo_slug: sale-import
+repo_website: https://github.com/akretion/sale-import
 travis_apt_packages: []
 travis_apt_sources: []
+
