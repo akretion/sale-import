@@ -20,6 +20,7 @@
                         <group name="general_info" string="General information">
                             <field name="active" invisible="1" />
                             <field name="partner_id" />
+                            <field name="sequence_id" />
                         </group>
                     </sheet>
                 </form>
