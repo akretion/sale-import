@@ -2,7 +2,5 @@ odoo_test_helper
 mock
 httpx
 
-odoo-addon-sale-exception @ git+https://github.com/OCA/sale-workflow@refs/pull/2266/head#subdirectory=setup/sale_exception
-odoo-addon-endpoint-route-handler @ git+https://github.com/acsone/web-api.git@16.0-mig-endpoint_route_handler#subdirectory=setup/endpoint_route_handler
-odoo-addon-fastapi @ git+https://github.com/akretion/rest-framework.git@16.0-fastapi-fix#subdirectory=setup/fastapi
-odoo-addon-extendable @ git+https://github.com/OCA/rest-framework.git@refs/pull/313/head#subdirectory=setup/extendable
+odoo-addon-endpoint-route-handler @ git+https://github.com/simahawk/web-api.git@16-route-handler#subdirectory=setup/endpoint_route_handler
+odoo-addon-fastapi @ git+https://github.com/acsone/rest-framework.git@16.0-fastapi#subdirectory=setup/fastapi
