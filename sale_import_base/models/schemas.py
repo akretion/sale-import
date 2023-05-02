@@ -54,6 +54,8 @@ class SaleOrderLine(BaseModel):
     # product code is calculated afterward in odoo
     meta_data: Optional[Dict]
     product_external_ref: Optional[str]
+    # for white label man
+    external_id: Optional[str]
 
 
 class Amount(BaseModel):
