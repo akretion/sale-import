@@ -3,7 +3,7 @@
 
 {
     "name": "Job Queue Chunk",
-    "version": "14.0.1.0.1",
+    "version": "14.0.1.1.0",
     "author": "Akretion, Odoo Community Association (OCA)",
     "website": "https://github.com/akretion/sale-import",
     "license": "AGPL-3",
