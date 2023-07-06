@@ -31,7 +31,7 @@ addon | version | maintainers | summary
 [sale_channel_partner](sale_channel_partner/) | 14.0.1.0.0 |  | Bind sale channels to contacts
 [sale_channel_product](sale_channel_product/) | 14.0.1.0.0 |  | Link Product with sale channel
 [sale_channel_white_label](sale_channel_white_label/) | 14.0.1.0.0 |  | Base for white label management
-[sale_import_base](sale_import_base/) | 14.0.1.0.0 |  | Base for importing Sale Orders through a JSON file format
+[sale_import_base](sale_import_base/) | 14.0.1.1.0 |  | Base for importing Sale Orders through a JSON file format
 [sale_import_delivery_carrier](sale_import_delivery_carrier/) | 14.0.1.0.0 |  | Adds delivery carrier functionality to Sale Imports
 [sale_import_rest](sale_import_rest/) | 14.0.1.0.1 |  | REST API for importig Sale Orders
 
