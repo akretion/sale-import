@@ -2,10 +2,21 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl)
 
 from datetime import date
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from extendable_pydantic import ExtendableModelMeta
 from pydantic import BaseModel  # pylint: disable=missing-manifest-dependency
+
+
+class DeliveryCarrier(BaseModel):
+    delivery_type: str
+    id_relais: Optional[str] = None
+    price_unit: float
+
+
+class SaleCustomerConfig(BaseModel):
+    prefilled_values: Dict
+    product_reference: str
 
 
 class Address(BaseModel, metaclass=ExtendableModelMeta):
@@ -19,18 +30,31 @@ class Address(BaseModel, metaclass=ExtendableModelMeta):
     country_code: str
     phone: Optional[str] = None
     mobile: Optional[str] = None
+    company_name: Optional[str] = None  # obligatoire si pro
+    siret: Optional[str] = None
+    delivery_instruction: Optional[str] = None
+    # usefull for invoicing addrss / white label
+    external_id: Optional[str] = None
 
 
 class Customer(Address):
     external_id: str
+    is_pro: Optional[bool] = False
+    pro_reseller: Optional[bool] = False
+    vat: Optional[str] = None
 
 
 class SaleOrderLine(BaseModel, metaclass=ExtendableModelMeta):
-    product_code: str
+    # product code is calculated afterward in odoo
+    product_code: Optional[str] = None
     qty: float
     price_unit: float
     description: Optional[str] = None
     discount: Optional[float] = None
+    customer_configuration: Optional[SaleCustomerConfig] = None
+    product_type: str
+    meta_data: Optional[Dict] = None
+    product_external_ref: Optional[str] = None
 
 
 class Amount(BaseModel, metaclass=ExtendableModelMeta):
@@ -63,3 +87,6 @@ class SaleOrder(BaseModel):
     payment: Optional[Payment] = None
     pricelist_id: Optional[int] = None
     date_order: Optional[date] = None
+    payment_method: str
+    meta_data: Optional[Dict] = None
+    delivery_carrier: DeliveryCarrier
