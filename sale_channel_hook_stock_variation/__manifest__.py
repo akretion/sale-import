@@ -4,7 +4,7 @@
 {
     "name": "Sale Channel Hook Stock Variation",
     "summary": """ On stock variation, trigger notification to external webservice """,
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.0.1",
     "website": "https://github.com/akretion/sale-import",
     "author": "Akretion,Odoo Community Association (OCA)",
     "license": "AGPL-3",
