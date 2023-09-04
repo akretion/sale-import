@@ -21,7 +21,7 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
-[queue_job_chunk](queue_job_chunk/) | 14.0.1.0.1 |  | Job Queue Chunk
+[queue_job_chunk](queue_job_chunk/) | 14.0.1.1.0 |  | Job Queue Chunk
 [sale_channel](sale_channel/) | 14.0.1.0.0 |  | Adds the notion of sale channels
 [sale_channel_hook](sale_channel_hook/) | 14.0.1.0.0 |  | Adds customizable hooks to the sale channel
 [sale_channel_hook_delivery_done](sale_channel_hook_delivery_done/) | 14.0.1.0.0 |  | Adds a hook for when a Sale Order is marked as delivered
