@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="api_key_amazon" model="auth.api.key">
-        <field name="name">Demo Api Key for Amazon</field>
-        <field name="key">ASecureKeyAmazon</field>
-        <field name="user_id" eval="ref('base.user_admin')" />
+    <record id="sale_channel_api_rest" model="sale.channel">
+        <field name="name">Api rest</field>
     </record>
-    <record id="api_key_ebay" model="auth.api.key">
-        <field name="name">Demo Api Key for Ebay</field>
-        <field name="key">ASecureKeyEbay</field>
-        <field name="user_id" eval="ref('base.user_admin')" />
+
+    <record id="api_key_rest" model="auth.api.key">
+        <field name="name">Demo Api Key for Api Rest</field>
+        <field name="key">ASecureKeyApiRest</field>
+        <field name="user_id" eval="ref('user_import')" />
     </record>
-    <record id="sale_channel.sale_channel_amazon" model="sale.channel">
-        <field name="api_key_id" eval="ref('sale_import_rest.api_key_amazon')" />
-    </record>
-    <record id="sale_channel.sale_channel_ebay" model="sale.channel">
-        <field name="api_key_id" eval="ref('sale_import_rest.api_key_ebay')" />
-    </record>
+
 </odoo>
