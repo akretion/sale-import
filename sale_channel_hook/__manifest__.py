@@ -6,7 +6,7 @@
     "version": "14.0.1.0.0",
     "category": "Generic Modules/Sale",
     "author": "Akretion, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/sale-channel",
+    "website": "https://github.com/akretion/sale-import",
     "depends": ["sale_channel", "queue_job", "server_environment"],
     "demo": ["demo/demo.xml"],
     "license": "AGPL-3",
