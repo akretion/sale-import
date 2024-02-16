@@ -7,7 +7,7 @@
     "summary": "Link Product with sale channel",
     "version": "14.0.1.0.0",
     "category": "Sale Channel",
-    "website": "https://github.com/OCA/sale-channel",
+    "website": "https://github.com/akretion/sale-import",
     "author": "Akretion,Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "application": False,
