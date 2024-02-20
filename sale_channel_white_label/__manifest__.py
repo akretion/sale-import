@@ -13,6 +13,7 @@
         "views/sale_channel_view.xml",
     ],
     "demo": [
+        "demo/res_partner.xml",
         "demo/sale_channel.xml",
     ],
     "installable": True,
