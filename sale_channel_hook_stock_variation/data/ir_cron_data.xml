@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="ir_cron_synchronize_stock" model="ir.cron">
+            <field name="name">Synchronise le stock</field>
+            <field name="interval_number">12</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field
+                name="nextcall"
+                eval="(DateTime.now() + timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:%S')"
+            />
+            <field name="doall" eval="False" />
+            <field name="model_id" ref="model_sale_channel" />
+            <field name="code">model.sync_stock()</field>
+            <field name="state">code</field>
+        </record>
+    </data>
+</odoo>
