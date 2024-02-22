@@ -230,7 +230,7 @@ class TestSaleOrderImport(SaleImportCase):
         new_payment = sale.transaction_ids
         self.assertEqual(new_payment.reference, "PMT-EXAMPLE-001")
         self.assertEqual(new_payment.acquirer_reference, "T123")
-        self.assertEqual(new_payment.amount, 1173),
+        (self.assertEqual(new_payment.amount, 1173),)
         self.assertEqual(new_payment.currency_id.name, "USD")
         self.assertEqual(new_payment.partner_id, sale.partner_id)
 
