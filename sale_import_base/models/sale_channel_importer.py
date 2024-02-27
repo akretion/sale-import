@@ -13,6 +13,11 @@ class SaleChannelImporter(models.TransientModel):
 
     chunk_id = fields.Many2one("queue.job.chunk", "Chunk")
 
+    def _get_formatted_data(self):
+        """Override if you need to translate the Chunk's raw data into the current
+        SaleOrder schemas"""
+        return self.chunk_id._get_data()
+
     def _get_existing_so(self, data):
         ref = data["name"]
         return self.env["sale.order"].search(
@@ -24,7 +29,8 @@ class SaleChannelImporter(models.TransientModel):
 
     def run(self):
         # Get validated sale order
-        data = SaleOrder(**self.chunk_id._get_data()).model_dump()
+        formatted_data = self._get_formatted_data()
+        data = SaleOrder(**formatted_data).model_dump()
         existing_so = self._get_existing_so(data)
         if existing_so:
             raise ValidationError(
