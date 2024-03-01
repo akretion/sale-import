@@ -5,8 +5,7 @@ import logging
 
 import requests
 
-from odoo import _, fields, models
-from odoo.exceptions import ValidationError
+from odoo import fields, models
 
 from odoo.addons.queue_job.job import identity_exact
 
@@ -42,42 +41,38 @@ class SaleChannel(models.Model):
     )
 
     def _get_data_stock(self, page):
-        url = self.get_stock_info_url
-        url = url.replace("{page_num}", str(page)) + "&token=" + self.auth_token
-        response = requests.get(url)
+        url = self.get_stock_info_url.format(page_num=page)
+        headers, payload, url = self._apply_webhook_security({}, {}, url)
+        response = requests.get(url, headers=headers)
         return response.json()
 
-    def sync_stock(self):
-        if not self.get_stock_info_url or not self.auth_token:
-            raise ValidationError(
-                _(
-                    "Set a secret token and define an API "
-                    "endpoint to use this channel's hook"
-                )
+    def _check_stock_level(self, data):
+        for line in data:
+            code, qty = line["default_code"], line["quantity"]
+            prd = self.env["channel.product.product"].search(
+                [
+                    ("record_id.default_code", "=", code),
+                    ("sale_channel_id", "=", self.id),
+                ]
             )
+            if prd and prd.last_notification_qty != qty:
+                prd.with_delay(
+                    identity_key=identity_exact,
+                    description="Force synchronisation du to stock error",
+                )._notify_channel_stock_variation()
+
+            else:
+                _logger.info(
+                    "Synchronisation du stock, produit non référencé dans odoo:  %s "
+                    % code
+                )
+
+    def sync_stock(self):
         page = 1
         while True:
             data = self._get_data_stock(page)
             page += 1
             if data:
-                for line in data:
-                    code, qty = line["default_code"], line["quantity"]
-                    prd = self.env["product.product"].search(
-                        [("default_code", "=", code)]
-                    )
-                    if prd:
-                        for channel in prd.channel_bind_ids:
-                            stock_qty = channel.last_notification_qty
-                            if stock_qty != qty:
-                                prd.channel_bind_ids.with_delay(
-                                    identity_key=identity_exact,
-                                    description="Force synchronisation du to stock error",
-                                )._notify_channel_stock_variation()
-
-                    else:
-                        _logger.info(
-                            "Synchronisation du stock, produit non référencé dans odoo:  %s "
-                            % code
-                        )
+                self._check_stock_level(data)
             else:
                 break
