@@ -28,7 +28,7 @@ class ImporterSaleChannel(Component):
         try:
             so_datamodel_load = self.env.datamodels["sale.order"].load_json(data)
         except MarshmallowValidationError as e:
-            raise ValidationError(e)
+            raise ValidationError(e) from e
         data = so_datamodel_load.dump()
         existing_so = self._get_existing_so(data)
         if existing_so:
