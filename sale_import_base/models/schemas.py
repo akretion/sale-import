@@ -63,3 +63,5 @@ class SaleOrder(BaseModel, metaclass=ExtendableModelMeta):
     payment: Optional[Payment] = None
     pricelist_id: Optional[int] = None
     date_order: Optional[date] = None
+    is_fulfilled_by_amazon: Optional[bool] = False
+    state: Optional[str] = None
