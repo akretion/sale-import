@@ -34,10 +34,11 @@ class SaleChannel(models.Model):
     get_stock_info_url = fields.Char(
         "Stock API endpoint URL",
         help="The url of api endpoint who give the stock value",
-        default="https://exemple.org/get_stock?page={page_num}",
+        default="https://example.org/get_stock?page={page_num}",
     )
     enable_stock_sync = fields.Boolean(
-        "Enable stock synchronisation (check stock in channel endpoint then syncs if delta)"
+        "Enable stock synchronisation"
+        "(check stock in channel endpoint then syncs if delta)"
     )
 
     def _get_data_stock(self, page):

@@ -76,7 +76,7 @@ class TestHookSaleState(SavepointCase):
         self.channel = self.env.ref("sale_channel.sale_channel_amazon")
         self.channel.warehouse_id = self.warehouse
         self.channel.hook_active_stock_variation = True
-        self.channel.get_stock_info_url = "https://onlineshop.org?spage={page_num}"
+        self.channel.get_stock_info_url = "https://example.org?spage={page_num}"
         self.binding_tmpl_id = self.env["channel.product.template"].create(
             {
                 "record_id": self.product.product_tmpl_id.id,
@@ -177,11 +177,11 @@ class TestHookSaleState(SavepointCase):
         )
         with requests_mock.mock() as m:
             m.get(
-                "https://onlineshop.org?spage=1",
+                "https://example.org?spage=1",
                 text=res_stock,
             )
             m.get(
-                "https://onlineshop.org?spage=2",
+                "https://example.org?spage=2",
                 text="[]",
             )
             with patch(FN_NAME) as mock:
