@@ -23,15 +23,16 @@ class ProductProductChannel(models.Model):
 
     def _check_stock_variation(self, force=False):
         for rec in self:
-            val = rec._get_stock_level()
-            if (
-                force
-                or float_compare(rec.last_notification_qty, val, precision_digits=2)
-                != 0
-            ):
-                rec.with_delay(
-                    identity_key=identity_exact
-                )._notify_channel_stock_variation()
+            if rec.sale_channel_id.hook_active_stock_variation:
+                val = rec._get_stock_level()
+                if (
+                    force
+                    or float_compare(rec.last_notification_qty, val, precision_digits=2)
+                    != 0
+                ):
+                    rec.with_delay(
+                        identity_key=identity_exact
+                    )._notify_channel_stock_variation()
 
     def _notify_channel_stock_variation(self):
         for rec in self:
