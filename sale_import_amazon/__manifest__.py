@@ -17,8 +17,6 @@
         # 'views/amazon_marketplace.xml',
         # 'views/sale_channel.xml',
         # "views/res_partner.xml",
-        # "views/product_product.xml",
-        # "views/amazon_product.xml",
         # "views/sale_order.xml",
         "security/ir.model.access.csv",
     ],

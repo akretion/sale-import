@@ -9,6 +9,7 @@ class AmazonMarketplace(models.Model):
     _description = "Amazon MarketPlace"
     # List on https://developer-docs.amazon.com/sp-api/docs/marketplace-ids
 
+    # TODO: create xml data with all the Amazon Marketplaces
     name = fields.Char()
     country_code = fields.Char(required=True)
     marketplace_ref = fields.Char()
