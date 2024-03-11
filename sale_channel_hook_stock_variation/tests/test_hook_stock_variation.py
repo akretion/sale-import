@@ -1,6 +1,9 @@
 #  Copyright (c) Akretion 2021
 #  License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+import json
+
+import requests_mock
 from mock import patch
 
 from odoo.tests import SavepointCase
@@ -73,6 +76,7 @@ class TestHookSaleState(SavepointCase):
         self.channel = self.env.ref("sale_channel.sale_channel_amazon")
         self.channel.warehouse_id = self.warehouse
         self.channel.hook_active_stock_variation = True
+        self.channel.get_stock_info_url = "https://example.org?spage={page_num}"
         self.binding_tmpl_id = self.env["channel.product.template"].create(
             {
                 "record_id": self.product.product_tmpl_id.id,
@@ -83,6 +87,15 @@ class TestHookSaleState(SavepointCase):
         self.location = self.warehouse.lot_stock_id
         self.location_dst = self.warehouse_dst.lot_stock_id
         self.last_move = self.env["stock.move"].search([], order="id desc")[0]
+        self.product2 = self.env.ref("product.product_product_5")
+        self.product2.type = "product"
+        self.product2.default_code = "PRODUCTCODE1"
+        self.binding_tmpl_id2 = self.env["channel.product.template"].create(
+            {
+                "record_id": self.product2.product_tmpl_id.id,
+                "sale_channel_id": self.channel.id,
+            }
+        )
 
     def get_created_moves(self):
         return self.env["stock.move"].search([("id", ">", self.last_move.id)])
@@ -154,3 +167,28 @@ class TestHookSaleState(SavepointCase):
             mock.assert_called_with(
                 "stock_variation", {"product_code": "PRODUCTCODE", "qty": 97.0}
             )
+
+    def test_check_stock_value_sync(self):
+        res_stock = json.dumps(
+            [
+                {"default_code": "PRODUCTCODE", "quantity": 10},
+                {"default_code": "PRODUCTCODE1", "quantity": -5},
+            ]
+        )
+        with requests_mock.mock() as m:
+            m.get(
+                "https://example.org?spage=1",
+                text=res_stock,
+            )
+            m.get(
+                "https://example.org?spage=2",
+                text="[]",
+            )
+            with patch(FN_NAME) as mock:
+                self.channel.with_context(test_queue_job_no_delay=True).sync_stock()
+                mock.mock_calls[0].assert_called_with(
+                    "stock_variation", {"product_code": "PRODUCTCODE", "qty": 45.0}
+                )
+                mock.mock_calls[1].assert_called_with(
+                    "stock_variation", {"product_code": "PRODUCTCODE1", "qty": 0.0}
+                )

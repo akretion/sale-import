@@ -11,6 +11,10 @@
     "application": False,
     "installable": True,
     "depends": ["sale_channel_hook", "sale_channel_product", "stock"],
-    "data": ["views/product_template.xml", "views/sale_channel.xml"],
+    "data": [
+        "views/product_template.xml",
+        "views/sale_channel.xml",
+        "data/ir_cron_data.xml",
+    ],
     "demo": [],
 }

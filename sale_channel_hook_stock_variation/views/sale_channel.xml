@@ -10,6 +10,14 @@
                     <group>
                         <field name="hook_active_stock_variation" />
                         <field name="warehouse_id" />
+                        <field
+                            name="enable_stock_sync"
+                            attrs="{'invisible': [('hook_active_stock_variation', '=', False)]}"
+                        />
+                        <field
+                            name="get_stock_info_url"
+                            attrs="{'invisible': [('enable_stock_sync', '=', False)]}"
+                        />
                     </group>
                 </xpath>
             </field>
