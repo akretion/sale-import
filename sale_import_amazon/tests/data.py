@@ -32,7 +32,7 @@ ORDER_SHIPPED = [
                 "PromotionDiscountTax": {"Amount": "0.00", "CurrencyCode": "EUR"},
                 "QuantityOrdered": 2,
                 "QuantityShipped": 2,
-                "SellerSKU": "FURN_8888",
+                "SellerSKU": "PROD_1",
                 "Title": "Clever Elf - Décoration de Table de Noël",
             }
         ],

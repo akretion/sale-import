@@ -1,8 +1,7 @@
 import dateutil
-
-from sp_api.base import Marketplaces
 from sp_api.api import Orders
-from sp_api.util import throttle_retry, load_all_pages
+from sp_api.base import Marketplaces
+from sp_api.util import load_all_pages, throttle_retry
 
 
 @throttle_retry()

@@ -7,16 +7,18 @@
     "version": "16.0.1.0.0",
     "license": "AGPL-3",
     "author": "Akretion",
-    "website": "http://akretion.com",
+    "website": "https://github.com/akretion/sale-import",
     "depends": [
-        "sale_stock",
+        "stock",
         # https://github.com/akretion/sale-import/
         "sale_import_base",
     ],
     "data": [
-        # 'views/amazon_marketplace.xml',
-        # 'views/sale_channel.xml',
-        # "views/sale_order.xml",
+        "views/amazon_marketplace.xml",
+        "views/sale_channel.xml",
+        "views/sale_order.xml",
+        "data/amazon_marketplace.xml",
+        "data/amazon_cron.xml",
         "security/ir.model.access.csv",
     ],
     "demo": [],
