@@ -62,11 +62,9 @@ class SaleChannelImporter(models.TransientModel):
             "partner_shipping_id": address_shipping.id,
             "client_order_ref": data["name"],
             "sale_channel_id": channel.id,
+            "pricelist_id": data.get("pricelist_id") or channel.pricelist_id.id,
+            "team_id": channel.crm_team_id.id,
         }
-
-        pricelist_id = data.get("pricelist_id") or channel.pricelist_id.id
-        if pricelist_id:
-            so_vals["pricelist_id"] = pricelist_id
 
         amount = data.get("amount")
         if amount:
@@ -201,6 +199,7 @@ class SaleChannelImporter(models.TransientModel):
         }
         if line_data.get("description"):
             vals["name"] = line_data["description"]
+
         return vals
 
     def _finalize(self, new_sale_order, raw_import_data):

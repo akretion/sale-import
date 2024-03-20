@@ -1,42 +1,43 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- Copyright 2024 Akretion
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
-
 <odoo>
 
-    <record model="ir.ui.view" id="amazon_marketplace_form_view">
+    <record id="amazon_marketplace_form_view" model="ir.ui.view">
         <field name="name">amazon.marketplace.form (in sale_import_amazon)</field>
         <field name="model">amazon.marketplace</field>
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <!-- TODO -->
+                    <field name="name" />
                 </header>
                 <sheet>
-                    <!-- TODO -->
                     <group>
-                        <field name="name"/>
+                        <group>
+                            <field name="country_code" />
+                            <field name="marketplace_ref" />
+                        </group>
                     </group>
                 </sheet>
-                <div class="oe_chatter"></div>
             </form>
         </field>
     </record>
 
 
-    <record model="ir.ui.view" id="amazon_marketplace_tree_view">
+    <record id="amazon_marketplace_tree_view" model="ir.ui.view">
         <field name="name">amazon.marketplace.tree (in sale_import_amazon)</field>
         <field name="model">amazon.marketplace</field>
         <field name="arch" type="xml">
             <tree>
-                <!-- TODO -->
-                <field name="name"/>
+                <field name="name" />
+                <field name="country_code" />
+                <field name="marketplace_ref" />
             </tree>
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="amazon_marketplace_act_window">
-        <field name="name">Amazon Marketplace</field> <!-- TODO -->
+    <record id="amazon_marketplace_act_window" model="ir.actions.act_window">
+        <field name="name">Amazon Marketplace</field>
         <field name="res_model">amazon.marketplace</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[]</field>
@@ -45,9 +46,9 @@
 
     <record model="ir.ui.menu" id="amazon_marketplace_menu">
         <field name="name">Amazon Marketplace</field>
-        <field name="parent_id" ref="xmlid of parent menu"/> <!-- TODO -->
-        <field name="action" ref="amazon_marketplace_act_window"/>
-        <field name="sequence" eval="16"/> <!-- TODO -->
+        <field name="parent_id" ref="sale.menu_sale_config" />
+        <field name="action" ref="amazon_marketplace_act_window" />
+        <field name="sequence" eval="99" />
     </record>
 
 </odoo>

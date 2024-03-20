@@ -1,15 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- Copyright 2024 Akretion
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
-
 <odoo>
 
     <record model="ir.ui.view" id="sale_order_form_view">
         <field name="name">sale.order.form (in sale_import_amazon)</field>
         <field name="model">sale.order</field>
-        <field name="inherit_id" ref="TODO othermodule.form_view"/>
+        <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
-            <!-- TODO -->
+            <xpath expr="//page[@name='other_information']" position="inside">
+                <group>
+                    <group name="amazon_import" string="Amazon Import">
+                        <field name="is_fulfilled_by_amazon" readonly="1" />
+                        <field name="amazon_marketplace_id" readonly="1" />
+                    </group>
+                </group>
+            </xpath>
         </field>
     </record>
 
