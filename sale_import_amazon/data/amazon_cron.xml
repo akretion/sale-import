@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ir_cron_amazon_create_queue_job_chunk" model="ir.cron">
+        <field name="name">Amazon: import orders</field>
+        <field name="model_id" ref="model_sale_channel" />
+        <field name="state">code</field>
+        <field name="code">model.amazon_import_orders_chunk_cron()</field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">60</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field
+            name="nextcall"
+            eval="(DateTime.now() + timedelta(minutes=30)).strftime('%Y-%m-%d %H:%M:%S')"
+        />
+        <field name="doall" eval="False" />
+        <field name="priority">1000</field>
+    </record>
+
+</odoo>

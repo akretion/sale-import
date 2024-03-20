@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2024 Akretion
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+
+    <record model="ir.ui.view" id="sale_channel_form_view">
+        <field name="name">sale.channel.form (in sale_import_amazon)</field>
+        <field name="model">sale.channel</field>
+        <field name="inherit_id" ref="sale_import_base.sale_channel_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='sale_import_base']/.." position="after">
+                <group
+                    name="sale_import_amazon"
+                    string="Amazon Import Parameters"
+                    attrs="{'invisible': [('channel_type', '!=', 'amazon')]}"
+                >
+                    <group>
+                        <field name="lwa_appid" />
+                        <field name="sp_api_refresh_token" />
+                        <field name="lwa_client_secret" />
+                    </group>
+                    <group>
+                        <field name="marketplace_ids" widget="many2many_tags" />
+                        <field name="amazon_location_id" />
+                        <field name="date_last_sale_update" />
+                    </group>
+                    <button
+                        name="amazon_import_orders_chunk"
+                        string="Import Amazon Orders"
+                        type="object"
+                        class="btn btn-primary col-6 col-lg-3"
+                    />
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+
+
+</odoo>
