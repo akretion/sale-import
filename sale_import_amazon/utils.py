@@ -32,6 +32,9 @@ def load_order_items(credentials, country_code, amazon_ref):
     """
     marketplace = Marketplaces.__getattr__(country_code)
 
+    # FIXME: QuotaExceeded error when last_updated_after > 100 days
+    # "You exceeded your quota for the requested resource.""
+
     return Orders(credentials=credentials, marketplace=marketplace).get_order_items(
         amazon_ref
     )

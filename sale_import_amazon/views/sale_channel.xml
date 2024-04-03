@@ -14,12 +14,12 @@
                     string="Amazon Import Parameters"
                     attrs="{'invisible': [('channel_type', '!=', 'amazon')]}"
                 >
-                    <group>
+                    <group name="amazon_credentials" groups="base.group_system">
                         <field name="lwa_appid" />
                         <field name="sp_api_refresh_token" />
                         <field name="lwa_client_secret" />
                     </group>
-                    <group>
+                    <group name="amazon_data">
                         <field name="marketplace_ids" widget="many2many_tags" domain="[('country_code','!=',False)]"/>
                         <field name="amazon_location_id" />
                         <field name="date_last_sale_update" />

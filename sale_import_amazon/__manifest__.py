@@ -10,6 +10,8 @@
     "website": "https://github.com/akretion/sale-import",
     "depends": [
         "stock",
+        # https://github.com/OCA/server-env
+        "server_environment",
         # https://github.com/akretion/sale-import/
         "sale_import_base",
     ],

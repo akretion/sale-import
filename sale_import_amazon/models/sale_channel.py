@@ -11,12 +11,12 @@ from odoo.addons.sale_import_amazon.utils import load_order_items, load_order_pa
 
 
 class SaleChannel(models.Model):
-    _inherit = "sale.channel"
+    _name = "sale.channel"
+    _inherit = ["sale.channel", "server.env.mixin"]
 
     channel_type = fields.Selection(selection_add=[("amazon", "Amazon")])
 
     lwa_appid = fields.Char(string="LWA App ID")
-    # TODO: use data_encryption to store these fields here
     sp_api_refresh_token = fields.Char(string="SP-API Refresh Token")
     lwa_client_secret = fields.Char(string="LWA Client Secret")
 
@@ -34,6 +34,17 @@ class SaleChannel(models.Model):
     amazon_location_id = fields.Many2one(
         "stock.location", string="Amazon Stock Location"
     )
+
+    @property
+    def _server_env_fields(self):
+        result = super()._server_env_fields
+        sale_channel_fields = {
+            "lwa_appid": {},
+            "sp_api_refresh_token": {},
+            "lwa_client_secret": {},
+        }
+        result.update(sale_channel_fields)
+        return result
 
     def amazon_get_credentials(self):
         return dict(
