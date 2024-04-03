@@ -4,7 +4,7 @@
 from odoo import _, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.sale_import_amazon.utils import get_amz_date
+from ..utils import get_amz_date
 
 
 class SaleChannelImporterAmazon(models.TransientModel):
@@ -55,7 +55,7 @@ class SaleChannelImporterAmazon(models.TransientModel):
         )
         if not marketplace_id:
             raise ValidationError(
-                _("Missing Amazon MarketPlace {}").format(raw["MarketplaceId"])
+                _("Missing Amazon MarketPlace %s") % raw["MarketplaceId"]
             )
 
         formatted_data = {
@@ -79,9 +79,10 @@ class SaleChannelImporterAmazon(models.TransientModel):
             if currency_code != currency_id.name:
                 raise ValidationError(
                     _(
-                        " The Curency code {} is different from Sale Channel "
-                        "pricelist's currency {}"
-                    ).format(currency_code, currency_id.name)
+                        " The Curency code %(currency_code)s is different from Sale Channel "
+                        "pricelist's currency %s"
+                    )
+                    % currency_id.name
                 )
             formatted_data["amount"] = {"amount_total": raw["OrderTotal"]["Amount"]}
 
@@ -91,9 +92,12 @@ class SaleChannelImporterAmazon(models.TransientModel):
         if data["state"] == "canceled" and existing_so.state != "cancel":
             existing_so._action_cancel()
         elif data["state"] == "shipped" and existing_so.delivery_status != "full":
-            existing_so._deliver_order_by_amazon()
+            # TODO
+            # existing_so._deliver_order_by_amazon()
+            pass
         else:
-            super()._manage_existing_so(existing_so, data)
+            res = super()._manage_existing_so(existing_so, data)
+            return res
 
     def _prepare_sale_vals(self, data):
         so_vals = super()._prepare_sale_vals(data)
@@ -107,8 +111,11 @@ class SaleChannelImporterAmazon(models.TransientModel):
         return so_vals
 
     def _finalize(self, new_sale_order, raw_import_data):
-        super()._finalize(new_sale_order, raw_import_data)
+        res = super()._finalize(new_sale_order, raw_import_data)
         if raw_import_data["state"] == "shipped":
-            new_sale_order._deliver_order_by_amazon()
+            # TODO
+            # new_sale_order._deliver_order_by_amazon()
+            pass
         if raw_import_data["state"] == "canceled":
             new_sale_order._action_cancel()
+        return res

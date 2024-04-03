@@ -3,7 +3,7 @@
 
 {
     "name": "Connector Amazon",
-    "description": """Connect Amazon SP-API with Odoo""",
+    "summary": """Connect Amazon SP-API with Odoo""",
     "version": "16.0.1.0.0",
     "license": "AGPL-3",
     "author": "Akretion",

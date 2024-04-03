@@ -7,7 +7,7 @@ from datetime import timedelta
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.sale_import_amazon.utils import load_order_items, load_order_pages
+from ..utils import load_order_items, load_order_pages
 
 
 class SaleChannel(models.Model):

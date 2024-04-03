@@ -46,7 +46,7 @@ class TestConnectorAmazon(TransactionCase, ExtendableMixin):
                 "sp_api_refresh_token": os.environ.get("SP_API_REFRESH_TOKEN"),
                 "lwa_client_secret": os.environ.get("LWA_CLIENT_SECRET"),
                 "marketplace_ids": [Command.set([self.marketplace_id.id])],
-                "date_last_sale_update": fields.Datetime.now() - timedelta(days=120),
+                "date_last_sale_update": fields.Datetime.now() - timedelta(days=10),
                 "crm_team_id": self.team_id.id,
                 "sale_orders_check_amounts_total": True,
                 "confirm_order": True,
