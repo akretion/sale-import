@@ -40,7 +40,7 @@ class SaleChannelImporter(models.TransientModel):
         data = SaleOrder(**formatted_data).model_dump()
         existing_so = self._get_existing_so(data)
         if existing_so:
-            self._manage_existing_so(self, existing_so, data)
+            self._manage_existing_so(existing_so, data)
             return existing_so
 
         so_vals = self._prepare_sale_vals(data)
