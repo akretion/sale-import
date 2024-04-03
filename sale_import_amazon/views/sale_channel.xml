@@ -20,7 +20,7 @@
                         <field name="lwa_client_secret" />
                     </group>
                     <group>
-                        <field name="marketplace_ids" widget="many2many_tags" />
+                        <field name="marketplace_ids" widget="many2many_tags" domain="[('country_code','!=',False)]"/>
                         <field name="amazon_location_id" />
                         <field name="date_last_sale_update" />
                     </group>
