@@ -5,8 +5,8 @@
 from odoo import fields, models
 
 
-class PaymentProvider(models.Model):
-    _inherit = "payment.provider"
+class PaymentAcquirer(models.Model):
+    _inherit = "payment.acquirer"
 
     ref = fields.Char()
 
