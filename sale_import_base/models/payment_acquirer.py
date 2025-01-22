@@ -5,8 +5,8 @@
 from odoo import fields, models
 
 
-class PaymentProvider(models.Model):
-    _inherit = "payment.provider"
+class PaymentAcquirer(models.Model):
+    _inherit = "payment.acquirer"
 
     # code is renamed in ref in v16
     # we keep it as is, to keep compatibility only in v14

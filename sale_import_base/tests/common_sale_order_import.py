@@ -82,7 +82,7 @@ class SaleImportCase(TestSaleCommonNoDuplicates, ExtendableMixin):
         cls.init_extendable_registry()
         account_user = cls.env.user
         cls.env = cls.env(user=cls.env.ref("base.user_root"))
-        cls.setUpPaymentProvider()
+        cls.setUpPaymentAcquirer()
         cls.env = cls.env(user=account_user)
         cls.setUpMisc()
         cls.setUpProducts()
@@ -95,13 +95,13 @@ class SaleImportCase(TestSaleCommonNoDuplicates, ExtendableMixin):
         cls.sale_order_example_vals_mixed = mixed
         cls.sale_order_example_vals_invalid = invalid
         cls.last_sale_id = (
-            cls.env["sale.order"].search([], order="id desc", limit=1).id or 0
+            cls.env["sale.order"].sudo().search([], order="id desc", limit=1).id or 0
         )
         cls.sale_channel_ebay = cls.env.ref("sale_channel.sale_channel_ebay")
 
     @classmethod
     def get_created_sales(cls):
-        return cls.env["sale.order"].search(
+        return cls.env["sale.order"].sudo().search(
             [("id", ">", cls.last_sale_id)], order="id desc"
         )
 
@@ -111,35 +111,19 @@ class SaleImportCase(TestSaleCommonNoDuplicates, ExtendableMixin):
         cls.product_b.default_code = "SKU_B"
 
     @classmethod
-    def setUpPaymentProvider(cls):
-        # Create manual provider
-        cls.env["payment.provider"]._fields["code"].selection.append(
-            ("credit_card", "Credit Card")
-        )
-        cls.env["payment.provider"].create(
-            {
-                "name": "Credit Card",
-                "ref": "credit_card",
-                "code": "credit_card",
-                "company_id": cls.company_data["company"].id,
-            }
-        )
-        method = cls.env["account.payment.method"].create(
-            {
-                "code": "credit_card",
-                "name": "Credit Card",
-                "payment_type": "inbound",
-            }
-        )
-        cls.env["account.payment.method.line"].create(
-            [
-                {
-                    "name": method.code,
-                    "payment_method_id": method.id,
-                    "journal_id": cls.company_data["default_journal_bank"].id,
-                }
-            ]
-        )
+    def setUpPaymentAcquirer(cls):
+        PaymentAcquirer = cls.env["payment.acquirer"]
+
+        # Acquirer and mode of payment
+        acquirer_vals = {
+            "name": "Credit Card",
+            "ref": "credit_card",
+            "provider": "manual",
+            "company_id": cls.env.ref("base.main_company").id,
+            "payment_flow": "s2s",
+            "journal_id": cls.company_data["default_journal_bank"].id,
+        }
+        PaymentAcquirer.create(acquirer_vals)
 
     @classmethod
     def setUpMisc(cls):
@@ -162,4 +146,4 @@ class SaleImportCase(TestSaleCommonNoDuplicates, ExtendableMixin):
     def _helper_create_chunk(cls, vals_dict):
         """Converts data_str content to appropriate JSON format"""
         vals_dict["data_str"] = json.dumps(vals_dict["data_str"])
-        return cls.env["queue.job.chunk"].create(vals_dict)
+        return cls.env["queue.job.chunk"].sudo().create(vals_dict)

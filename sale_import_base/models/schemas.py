@@ -49,7 +49,7 @@ class Payment(BaseModel, metaclass=ExtendableModelMeta):
     amount: float
     reference: str
     currency_code: str
-    provider_reference: Optional[str] = None
+    acquirer_reference: Optional[str] = None
 
 
 class SaleOrder(BaseModel, metaclass=ExtendableModelMeta):

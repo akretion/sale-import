@@ -239,8 +239,8 @@ class TestSaleOrderImport(SaleImportCase):
         sale = self.get_created_sales()
         new_payment = sale.transaction_ids
         self.assertEqual(new_payment.reference, "PMT-EXAMPLE-001")
-        self.assertEqual(new_payment.provider_reference, "T123")
-        self.assertEqual(new_payment.amount, 1173),
+        self.assertEqual(new_payment.acquirer_reference, "T123")
+        (self.assertEqual(new_payment.amount, 1173),)
         self.assertEqual(new_payment.currency_id.name, "USD")
         self.assertEqual(new_payment.partner_id, sale.partner_id)
 
@@ -304,7 +304,7 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(invoice.state, "draft")
 
         # Process transaction (normally done by a cron)
-        sale.transaction_ids._cron_finalize_post_processing()
+        sale.transaction_ids._post_process_after_done()
         self.assertEqual(invoice.state, "posted")
         self.assertEqual(invoice.payment_state, "paid")
 
