@@ -21,6 +21,11 @@
                             <field name="active" invisible="1" />
                             <field name="partner_id" />
                             <field name="sequence_id" />
+                            <field name="channel_type" />
+                            <field
+                                name="company_id"
+                                groups="base.group_multi_company"
+                            />
                         </group>
                     </sheet>
                 </form>
