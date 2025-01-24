@@ -235,10 +235,10 @@ class SaleChannelImporter(models.TransientModel):
         if not data.get("payment"):
             return
         pmt_data = data["payment"]
-        provider = self.env["payment.provider"].search([("ref", "=", pmt_data["mode"])])
-        if not provider:
+        acquirer = self.env["payment.acquirer"].search([("ref", "=", pmt_data["mode"])])
+        if not acquirer:
             raise ValidationError(
-                _("Missing Provider with code {}").format(pmt_data["mode"])
+                _("Missing Acquirer_id with code {}").format(pmt_data["mode"])
             )
         if pmt_data.get("currency_code"):
             currency = self.env["res.currency"].search(
@@ -265,13 +265,14 @@ class SaleChannelImporter(models.TransientModel):
         )
         payment_vals = {
             "partner_id": sale_order.partner_id.id,
-            "provider_id": provider.id,
+            "acquirer_id": acquirer.id,
+            "type": "server2server",
             "state": "done",
-            "last_state_change": fields.Datetime.now(),
+            "date": fields.Datetime.now(),
             "amount": pmt_data["amount"],
             "fees": 0.00,
             "reference": pmt_data["reference"],
-            "provider_reference": pmt_data.get("provider_reference"),
+            "acquirer_reference": pmt_data.get("acquirer_reference"),
             "sale_order_ids": [(4, sale_order.id, 0)],
             "currency_id": sale_order.currency_id.id,
             "partner_country_id": country,
