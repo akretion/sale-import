@@ -95,13 +95,13 @@ class SaleImportCase(TestSaleCommonNoDuplicates, ExtendableMixin):
         cls.sale_order_example_vals_mixed = mixed
         cls.sale_order_example_vals_invalid = invalid
         cls.last_sale_id = (
-            cls.env["sale.order"].search([], order="id desc", limit=1).id or 0
+            cls.env["sale.order"].sudo().search([], order="id desc", limit=1).id or 0
         )
         cls.sale_channel_ebay = cls.env.ref("sale_channel.sale_channel_ebay")
 
     @classmethod
     def get_created_sales(cls):
-        return cls.env["sale.order"].search(
+        return cls.env["sale.order"].sudo().search(
             [("id", ">", cls.last_sale_id)], order="id desc"
         )
 

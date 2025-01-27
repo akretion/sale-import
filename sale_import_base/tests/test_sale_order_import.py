@@ -304,7 +304,7 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(invoice.state, "draft")
 
         # Process transaction (normally done by a cron)
-        sale.transaction_ids._cron_finalize_post_processing()
+        sale.transaction_ids._post_process_after_done()
         self.assertEqual(invoice.state, "posted")
         self.assertEqual(invoice.payment_state, "paid")
 
