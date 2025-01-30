@@ -27,7 +27,7 @@ addon | version | maintainers | summary
 [sale_channel_hook_delivery_done](sale_channel_hook_delivery_done/) | 14.0.1.0.0 |  | Adds a hook for when a Sale Order is marked as delivered
 [sale_channel_hook_invoice](sale_channel_hook_invoice/) | 14.0.1.0.0 |  | Adds a hook for when a sale order emits an invoice
 [sale_channel_hook_sale_state](sale_channel_hook_sale_state/) | 14.0.1.0.0 |  | Adds a hook for when a sale order emits an invoice
-[sale_channel_hook_stock_variation](sale_channel_hook_stock_variation/) | 14.0.1.0.0 |  | On stock variation, trigger notification to external webservice
+[sale_channel_hook_stock_variation](sale_channel_hook_stock_variation/) | 14.0.1.0.1 |  | On stock variation, trigger notification to external webservice
 [sale_channel_partner](sale_channel_partner/) | 14.0.1.0.0 |  | Bind sale channels to contacts
 [sale_channel_product](sale_channel_product/) | 14.0.1.0.0 |  | Link Product with sale channel
 [sale_channel_white_label](sale_channel_white_label/) | 14.0.1.0.0 |  | Base for white label management
