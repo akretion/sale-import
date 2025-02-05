@@ -9,9 +9,10 @@
     "website": "https://github.com/akretion/sale-import",
     "depends": [
         "queue_job_chunk",
+        "datamodel",
         "sale_channel_partner",
         "sale_exception",
-        "extendable",
+        "onchange_helper",
     ],
     "license": "AGPL-3",
     "data": [
@@ -22,7 +23,5 @@
     ],
     "demo": ["demo/demo.xml"],
     "installable": True,
-    "external_dependencies": {
-        "python": ["extendable_pydantic"],
-    },
+    "external_dependencies": {"python": ["marshmallow_objects"]},
 }

@@ -1,10 +1,9 @@
 #  Copyright (c) Akretion 2020
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl)
+from marshmallow_objects import ValidationError as MarshmallowValidationError
 
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
-
-from .schemas import SaleOrder
 
 
 class SaleChannelImporter(models.TransientModel):
@@ -37,7 +36,11 @@ class SaleChannelImporter(models.TransientModel):
     def run(self):
         # Get validated sale order
         formatted_data = self._get_formatted_data()
-        data = SaleOrder(**formatted_data).model_dump()
+        try:
+            so_datamodel_load = self.env.datamodels["sale.order"].load(formatted_data)
+        except MarshmallowValidationError as e:
+            raise ValidationError(e) from e
+        data = so_datamodel_load.dump()
         existing_so = self._get_existing_so(data)
         if existing_so:
             self._manage_existing_so(existing_so, data)
@@ -87,7 +90,23 @@ class SaleChannelImporter(models.TransientModel):
             so_vals["name"] = data["name"]
         if data.get("date_order"):
             so_vals["date_order"] = data["date_order"]
-        return so_vals
+
+        # We need to save the queue.job.chunk before to play_onchanges
+        # otherwise it is detached from self
+        chunk_id = self.chunk_id
+
+        onchange_fields = [
+            "payment_mode_id",
+            "workflow_process_id",
+            "fiscal_position_id",
+            "partner_id",
+            "partner_shipping_id",
+            "partner_invoice_id",
+            "company_id",
+        ]
+        result = self.env["sale.order"].play_onchanges(so_vals, onchange_fields)
+        self.chunk_id = chunk_id
+        return result
 
     def _process_partner(self, customer_data):
         partner = self._find_partner(customer_data)
@@ -220,7 +239,12 @@ class SaleChannelImporter(models.TransientModel):
         if line_data.get("description"):
             vals["name"] = line_data["description"]
 
-        return vals
+        # We need to save the queue.job.chunk before to play_onchanges
+        # otherwise it is detached from self
+        chunk_id = self.chunk_id
+        result = self.env["sale.order.line"].play_onchanges(vals, ["product_id"])
+        self.chunk_id = chunk_id
+        return result
 
     def _finalize(self, new_sale_order, raw_import_data):
         """Extend to add final operations"""

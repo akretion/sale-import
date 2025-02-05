@@ -6,7 +6,7 @@ from copy import deepcopy
 from odoo.tests import tagged
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.extendable.tests.common import ExtendableMixin
+from odoo.addons.datamodel.tests.common import SavepointDatamodelCase
 
 from .data import full, invalid, minimum, mixed
 
@@ -75,15 +75,11 @@ class TestSaleCommonNoDuplicates(AccountTestInvoicingCommon):
 
 
 @tagged("post_install", "-at_install")
-class SaleImportCase(TestSaleCommonNoDuplicates, ExtendableMixin):
+class SaleImportCase(TestSaleCommonNoDuplicates, SavepointDatamodelCase):
     @classmethod
     def setUpClass(cls):
         super(SaleImportCase, cls).setUpClass()
-        cls.init_extendable_registry()
-        account_user = cls.env.user
-        cls.env = cls.env(user=cls.env.ref("base.user_root"))
         cls.setUpPaymentAcquirer()
-        cls.env = cls.env(user=account_user)
         cls.setUpMisc()
         cls.setUpProducts()
         cls.fiscal_pos_a.auto_apply = True
@@ -101,8 +97,10 @@ class SaleImportCase(TestSaleCommonNoDuplicates, ExtendableMixin):
 
     @classmethod
     def get_created_sales(cls):
-        return cls.env["sale.order"].sudo().search(
-            [("id", ">", cls.last_sale_id)], order="id desc"
+        return (
+            cls.env["sale.order"]
+            .sudo()
+            .search([("id", ">", cls.last_sale_id)], order="id desc")
         )
 
     @classmethod
