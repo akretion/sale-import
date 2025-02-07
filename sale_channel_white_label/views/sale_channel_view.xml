@@ -6,12 +6,8 @@
             <field name="model">sale.channel</field>
             <field name="inherit_id" ref="sale_channel.sale_channel_view_form" />
             <field name="arch" type="xml">
-                <field name="partner_id" position="attributes">
-                    <attribute
-                    name="attrs"
-                >{'required': [('is_white_label', '=', True)]}</attribute>
-                </field>
-                <field name="partner_id" position="after">
+                <field name="active" position="before">
+                    <field name="partner_id" attrs="{'required': [('is_white_label', '=', True)]}"/>
                     <field name="is_white_label" />
                 </field>
             </field>
