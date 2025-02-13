@@ -13,6 +13,11 @@ class SaleChannelImporter(models.TransientModel):
 
     chunk_id = fields.Many2one("queue.job.chunk", "Chunk")
 
+    def _get_formatted_data(self):
+        """Override if you need to translate the Chunk's raw data into the current
+        SaleOrder schemas"""
+        return self.chunk_id._get_data()
+
     def _get_existing_so(self, data):
         ref = data["name"]
         return self.env["sale.order"].search(
@@ -22,14 +27,22 @@ class SaleChannelImporter(models.TransientModel):
             ]
         )
 
+    def _manage_existing_so(self, existing_so, data):
+        """Override if you need to update existing Sale Order instead of raising
+        an error"""
+        raise ValidationError(
+            _("Sale Order {} has already been created").format(data["name"])
+        )
+
     def run(self):
         # Get validated sale order
-        data = SaleOrder(**self.chunk_id._get_data()).model_dump()
+        formatted_data = self._get_formatted_data()
+        data = SaleOrder(**formatted_data).model_dump()
         existing_so = self._get_existing_so(data)
         if existing_so:
-            raise ValidationError(
-                _("Sale Order {} has already been created").format(data["name"])
-            )
+            self._manage_existing_so(existing_so, data)
+            return existing_so
+
         so_vals = self._prepare_sale_vals(data)
         sale_order = self.env["sale.order"].create(so_vals)
         so_line_vals = self._prepare_sale_line_vals(data, sale_order)
@@ -50,7 +63,9 @@ class SaleChannelImporter(models.TransientModel):
             "client_order_ref": data["name"],
             "sale_channel_id": channel.id,
             "pricelist_id": data.get("pricelist_id") or channel.pricelist_id.id,
+            "team_id": channel.crm_team_id.id,
         }
+
         amount = data.get("amount")
         if amount:
             so_vals.update(
@@ -166,17 +181,34 @@ class SaleChannelImporter(models.TransientModel):
         return [self._prepare_sale_line(line, sale_order) for line in data["lines"]]
 
     def _prepare_sale_line(self, line_data, sale_order):
+        channel = self.chunk_id.reference
+        company_id = channel.company_id
+
         product = self.env["product.product"].search(
-            [("default_code", "=", line_data["product_code"])]
+            [
+                ("default_code", "=", line_data["product_code"]),
+                ("product_tmpl_id.company_id", "=", company_id.id),
+            ]
         )
         if not product:
             raise ValidationError(
-                _("Missing product {}").format(line_data["product_code"])
+                _(
+                    "There is no active product with the Internal Reference %(code)s "
+                    "and related to the company %(company)s."
+                )
+                % {"code": line_data["product_code"], "company": company_id.name}
             )
         elif len(product) > 1:
             raise ValidationError(
-                _("%(product_num)s products found for the code %(code)s")
-                % {"product_num": len(product), "code": line_data["product_code"]}
+                _(
+                    "%(product_num)s products found for the code %(code)s and related "
+                    "to the company %(company)s."
+                )
+                % {
+                    "product_num": len(product),
+                    "code": line_data["product_code"],
+                    "company": company_id.name,
+                }
             )
         vals = {
             "product_id": product.id,
@@ -187,6 +219,7 @@ class SaleChannelImporter(models.TransientModel):
         }
         if line_data.get("description"):
             vals["name"] = line_data["description"]
+
         return vals
 
     def _finalize(self, new_sale_order, raw_import_data):

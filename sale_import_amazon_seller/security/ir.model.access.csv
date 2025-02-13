@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+sale_import_amazon_seller.access_sale_channel_importer_amazon_seller,access_sale_channel_importer_amazon_seller,sale_import_amazon_seller.model_sale_channel_importer_amazon_seller,base.group_user,1,1,1,1
