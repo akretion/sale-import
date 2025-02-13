@@ -12,10 +12,10 @@ from odoo.addons.extendable.tests.common import ExtendableMixin
 from odoo.addons.sale_import_amazon_seller.tests import data
 
 
-class TestConnectorAmazon(TransactionCase, ExtendableMixin):
+class TestSaleImportAmazonSeller(TransactionCase, ExtendableMixin):
     @classmethod
     def setUpClass(cls):
-        super(TestConnectorAmazon, cls).setUpClass()
+        super(TestSaleImportAmazonSeller, cls).setUpClass()
         cls.init_extendable_registry()
 
     def setUp(self):
@@ -40,7 +40,7 @@ class TestConnectorAmazon(TransactionCase, ExtendableMixin):
         )
         self.channel_id = self.env["sale.channel"].create(
             {
-                "name": "Connector Odoo-Amazon",
+                "name": "Connector Odoo-Amazon Seller",
                 "channel_type": "amazon_seller",
                 "lwa_appid": os.environ.get("LWA_APP_ID"),
                 "sp_api_refresh_token": os.environ.get("SP_API_REFRESH_TOKEN"),
