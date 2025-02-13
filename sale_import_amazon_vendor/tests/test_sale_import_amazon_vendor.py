@@ -4,10 +4,9 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-from odoo import Command, fields
+from odoo import fields
 from odoo.tests import TransactionCase
 
-from odoo.addons.extendable.tests.common import ExtendableMixin
 from odoo.addons.sale_import_amazon_vendor.tests import data
 
 PATCH = (
@@ -16,12 +15,7 @@ PATCH = (
 )
 
 
-class TestSaleImportAmazonVendor(TransactionCase, ExtendableMixin):
-    @classmethod
-    def setUpClass(cls):
-        super(TestSaleImportAmazonVendor, cls).setUpClass()
-        cls.init_extendable_registry()
-
+class TestSaleImportAmazonVendor(TransactionCase):
     def setUp(self):
         super().setUp()
         self.env = self.env(
@@ -40,7 +34,7 @@ class TestSaleImportAmazonVendor(TransactionCase, ExtendableMixin):
                 "name": "Product",
                 "default_code": "PROD_1",
                 "invoice_policy": "order",
-                "taxes_id": [Command.set([self.tax_incl.id])],
+                "taxes_id": [(6, 0, [self.tax_incl.id])],
             }
         )
         self.marketplace_id = self.env.ref("sale_import_amazon_base.marketplace_FR")
@@ -52,7 +46,7 @@ class TestSaleImportAmazonVendor(TransactionCase, ExtendableMixin):
             {
                 "name": "Amazon",
                 "channel_type": "amazon_vendor",
-                "marketplace_ids": [Command.set([self.marketplace_id.id])],
+                "marketplace_ids": [(6, 0, [self.marketplace_id.id])],
                 "date_changed_after": fields.Datetime.now() - timedelta(days=2),
                 "crm_team_id": self.team_id.id,
                 "sale_orders_check_amounts_total": True,

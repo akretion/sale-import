@@ -28,7 +28,9 @@ class SaleChannelImporterAmazon(models.TransientModel):
         partner = self._find_partner(customer_data)
         return partner
 
-    def _process_addresses(self, parent, address_invoice, address_shipping):
+    def _process_addresses(
+        self, parent, address_invoice, address_shipping, archive_addresses
+    ):
         """Catch Invoice and Shipping address by Amazon's External ID too"""
         address_invoice_id = self._find_partner(address_invoice)
         address_shipping_id = self._find_partner(address_shipping)
@@ -68,11 +70,12 @@ class SaleChannelImporterAmazon(models.TransientModel):
         shipping = {**basic_addr, "external_id": details["shipToParty"]["partyId"]}
         invoicing = {**basic_addr, "external_id": details["billToParty"]["partyId"]}
 
+        date_order = get_amz_date(details["purchaseOrderDate"]).strftime("%Y-%m-%d")
         amount = sum([self._get_line_total_incl_tax(i) for i in details["items"]])
 
         formatted_data = {
             "name": raw["purchaseOrderNumber"],
-            "date_order": get_amz_date(details["purchaseOrderDate"]).date(),
+            "date_order": date_order,
             "address_customer": customer,
             "address_shipping": shipping,
             "address_invoicing": invoicing,
