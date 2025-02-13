@@ -3,6 +3,8 @@
 
 import datetime
 
+import mock
+
 from odoo.tests import tagged
 
 from .common_sale_order_import import SaleImportCase
@@ -16,22 +18,30 @@ class TestSaleOrderImport(SaleImportCase):
             context=dict(self.env.context, test_queue_job_no_delay=True)
         )
         self.pricelist = self.env["product.pricelist"].create({"name": "Test"})
+        self.env.cr.commit = mock.Mock()
 
     def test_basic_all(self):
         """Base scenario: create a sale order"""
         chunk = self._helper_create_chunk(self.get_chunk_vals("all"))
+        self.assertEqual(
+            chunk.state, "done", f"{chunk.state_info}\n{chunk.stack_trace}"
+        )
         self.assertTrue(self.get_created_sales().ids)
-        self.assertEqual(chunk.state, "done")
 
     def test_basic_mixed(self):
         """Base scenario: create a sale order"""
         chunk = self._helper_create_chunk(self.get_chunk_vals("mixed"))
+        self.assertEqual(
+            chunk.state, "done", f"{chunk.state_info}\n{chunk.stack_trace}"
+        )
         self.assertTrue(self.get_created_sales().ids)
-        self.assertEqual(chunk.state, "done")
 
     def test_basic_minimum(self):
         """Base scenario: create a sale order"""
         chunk = self._helper_create_chunk(self.get_chunk_vals("minimum"))
+        self.assertEqual(
+            chunk.state, "done", f"{chunk.state_info}\n{chunk.stack_trace}"
+        )
         self.assertTrue(self.get_created_sales().ids)
         self.assertEqual(chunk.state, "done")
 
@@ -58,7 +68,7 @@ class TestSaleOrderImport(SaleImportCase):
         """
         Base scenario: import Sale Order with standard data
         -> Create partner
-        -> Create delivery, shipping addresses in inactive state
+        -> Create delivery, shipping addresses in inactive state by default
         """
         partner_count = (
             self.env["res.partner"].with_context(active_test=False).search_count([])
@@ -73,6 +83,30 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(sale.partner_shipping_id.active, False)
         self.assertEqual(sale.partner_invoice_id.type, "invoice")
         self.assertEqual(sale.partner_invoice_id.active, False)
+
+    def test_create_partner_no_archive(self):
+        """
+        Base scenario: import Sale Order with standard data
+        -> Create partner
+        -> Create delivery, shipping addresses remains active because
+            it has been configured with archive_addresses = False
+        """
+        partner_count = (
+            self.env["res.partner"].with_context(active_test=False).search_count([])
+        )
+        chunk_vals = self.get_chunk_vals("all")
+        channel = self.env["sale.channel"].browse(chunk_vals["record_id"])
+        channel.archive_addresses = False
+        self._helper_create_chunk(chunk_vals)
+        partner_count_after_import = (
+            self.env["res.partner"].with_context(active_test=False).search_count([])
+        )
+        self.assertEqual(partner_count_after_import, partner_count + 3)
+        sale = self.get_created_sales()
+        self.assertEqual(sale.partner_shipping_id.type, "delivery")
+        self.assertEqual(sale.partner_shipping_id.active, True)
+        self.assertEqual(sale.partner_invoice_id.type, "invoice")
+        self.assertEqual(sale.partner_invoice_id.active, True)
 
     def test_create_addresses_identical(self):
         """
@@ -304,3 +338,8 @@ class TestSaleOrderImport(SaleImportCase):
         self.assertEqual(chunk1.state, "done")
         self.assertEqual(chunk2.state, "fail")
         self.assertIn("Sale Order XX-0001 has already been created", chunk2.state_info)
+
+    def test_invalid_chunk(self):
+        chunk = self._helper_create_chunk(self.get_chunk_vals("invalid"))
+        self.assertEqual(chunk.state, "fail")
+        self.assertIn("ValidationError", chunk.state_info)

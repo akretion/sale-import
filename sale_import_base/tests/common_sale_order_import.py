@@ -6,10 +6,9 @@ from copy import deepcopy
 from odoo.tests import tagged
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.component.tests.common import SavepointComponentCase
 from odoo.addons.datamodel.tests.common import SavepointDatamodelCase
 
-from .data import full, minimum, mixed
+from .data import full, invalid, minimum, mixed
 
 
 @tagged("post_install", "-at_install")
@@ -76,9 +75,7 @@ class TestSaleCommonNoDuplicates(AccountTestInvoicingCommon):
 
 
 @tagged("post_install", "-at_install")
-class SaleImportCase(
-    TestSaleCommonNoDuplicates, SavepointDatamodelCase, SavepointComponentCase
-):
+class SaleImportCase(TestSaleCommonNoDuplicates, SavepointDatamodelCase):
     @classmethod
     def setUpClass(cls):
         super(SaleImportCase, cls).setUpClass()
@@ -92,15 +89,18 @@ class SaleImportCase(
         ).id
         cls.sale_order_example_vals_minimum = minimum
         cls.sale_order_example_vals_mixed = mixed
+        cls.sale_order_example_vals_invalid = invalid
         cls.last_sale_id = (
-            cls.env["sale.order"].search([], order="id desc", limit=1).id or 0
+            cls.env["sale.order"].sudo().search([], order="id desc", limit=1).id or 0
         )
         cls.sale_channel_ebay = cls.env.ref("sale_channel.sale_channel_ebay")
 
     @classmethod
     def get_created_sales(cls):
-        return cls.env["sale.order"].search(
-            [("id", ">", cls.last_sale_id)], order="id desc"
+        return (
+            cls.env["sale.order"]
+            .sudo()
+            .search([("id", ">", cls.last_sale_id)], order="id desc")
         )
 
     @classmethod
@@ -115,7 +115,7 @@ class SaleImportCase(
         # Acquirer and mode of payment
         acquirer_vals = {
             "name": "Credit Card",
-            "code": "credit_card",
+            "ref": "credit_card",
             "provider": "manual",
             "company_id": cls.env.ref("base.main_company").id,
             "payment_flow": "s2s",
@@ -134,9 +134,8 @@ class SaleImportCase(
         see data.py
         """
         return {
-            "apply_on_model": "sale.order",
             "data_str": deepcopy(getattr(cls, "sale_order_example_vals_" + which_data)),
-            "usage": "json_import",
+            "processor": "sale_channel_importer",
             "model_name": "sale.channel",
             "record_id": cls.env.ref("sale_channel.sale_channel_ebay").id,
         }
@@ -145,4 +144,4 @@ class SaleImportCase(
     def _helper_create_chunk(cls, vals_dict):
         """Converts data_str content to appropriate JSON format"""
         vals_dict["data_str"] = json.dumps(vals_dict["data_str"])
-        return cls.env["queue.job.chunk"].create(vals_dict)
+        return cls.env["queue.job.chunk"].sudo().create(vals_dict)

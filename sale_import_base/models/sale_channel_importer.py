@@ -1,40 +1,51 @@
 #  Copyright (c) Akretion 2020
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl)
-
-from datetime import datetime
-
 from marshmallow_objects import ValidationError as MarshmallowValidationError
 
-from odoo import _
+from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.component.core import Component
 
+class SaleChannelImporter(models.TransientModel):
+    _name = "sale.channel.importer"
+    _description = "Sale Channel Importer"
 
-class ImporterSaleChannel(Component):
-    _inherit = "processor"
-    _name = "importer.sale.channel"
-    _apply_on = ["sale.order"]
-    _usage = "json_import"
+    chunk_id = fields.Many2one("queue.job.chunk", "Chunk")
+
+    def _get_formatted_data(self):
+        """Override if you need to translate the Chunk's raw data into the current
+        SaleOrder schemas"""
+        return self.chunk_id._get_data()
 
     def _get_existing_so(self, data):
         ref = data["name"]
-        channel_id = self.collection.record_id
         return self.env["sale.order"].search(
-            [("client_order_ref", "=", ref), ("sale_channel_id", "=", channel_id)]
+            [
+                ("client_order_ref", "=", ref),
+                ("sale_channel_id", "=", self.chunk_id.reference.id),
+            ]
         )
 
-    def _run(self, data):
+    def _manage_existing_so(self, existing_so, data):
+        """Override if you need to update existing Sale Order instead of raising
+        an error"""
+        raise ValidationError(
+            _("Sale Order {} has already been created").format(data["name"])
+        )
+
+    def run(self):
+        # Get validated sale order
+        formatted_data = self._get_formatted_data()
         try:
-            so_datamodel_load = self.env.datamodels["sale.order"].load_json(data)
+            so_datamodel_load = self.env.datamodels["sale.order"].load(formatted_data)
         except MarshmallowValidationError as e:
             raise ValidationError(e) from e
         data = so_datamodel_load.dump()
         existing_so = self._get_existing_so(data)
         if existing_so:
-            raise ValidationError(
-                _("Sale Order {} has already been created").format(data["name"])
-            )
+            self._manage_existing_so(existing_so, data)
+            return existing_so
+
         so_vals = self._prepare_sale_vals(data)
         sale_order = self.env["sale.order"].create(so_vals)
         so_line_vals = self._prepare_sale_line_vals(data, sale_order)
@@ -42,33 +53,51 @@ class ImporterSaleChannel(Component):
         self._finalize(sale_order, data)
         return sale_order
 
-    def run(self):
-        return self._run(self.collection.data_str)
-
     def _prepare_sale_vals(self, data):
+        channel = self.chunk_id.reference
         partner = self._process_partner(data["address_customer"])
         address_invoice, address_shipping = self._process_addresses(
-            partner, data["address_invoicing"], data["address_shipping"]
+            partner,
+            data["address_invoicing"],
+            data["address_shipping"],
+            channel.archive_addresses,
         )
-        channel = self.env["sale.channel"].browse(self.collection.record_id)
         so_vals = {
             "partner_id": partner.id,
             "partner_invoice_id": address_invoice.id,
             "partner_shipping_id": address_shipping.id,
-            "si_amount_total": data.get("amount", {}).get("amount_total", 0),
-            "si_amount_untaxed": data.get("amount", {}).get("amount_untaxed", 0),
-            "si_amount_tax": data.get("amount", {}).get("amount_tax", 0),
-            "si_force_invoice_date": data.get("invoice") and data["invoice"]["date"],
-            "si_force_invoice_number": data.get("invoice")
-            and data["invoice"]["number"],
             "client_order_ref": data["name"],
             "sale_channel_id": channel.id,
             "pricelist_id": data.get("pricelist_id") or channel.pricelist_id.id,
+            "team_id": channel.crm_team_id.id,
         }
+
+        amount = data.get("amount")
+        if amount:
+            so_vals.update(
+                {
+                    "si_amount_total": amount.get("amount_total", 0),
+                    "si_amount_untaxed": amount.get("amount_untaxed", 0),
+                    "si_amount_tax": amount.get("amount_tax", 0),
+                }
+            )
+        invoice = data.get("invoice")
+        if invoice:
+            so_vals.update(
+                {
+                    "si_force_invoice_date": invoice.get("date"),
+                    "si_force_invoice_number": invoice.get("number"),
+                }
+            )
         if channel.internal_naming_method == "client_order_ref":
             so_vals["name"] = data["name"]
         if data.get("date_order"):
             so_vals["date_order"] = data["date_order"]
+
+        # We need to save the queue.job.chunk before to play_onchanges
+        # otherwise it is detached from self
+        chunk_id = self.chunk_id
+
         onchange_fields = [
             "payment_mode_id",
             "workflow_process_id",
@@ -76,8 +105,10 @@ class ImporterSaleChannel(Component):
             "partner_id",
             "partner_shipping_id",
             "partner_invoice_id",
+            "company_id",
         ]
         result = self.env["sale.order"].play_onchanges(so_vals, onchange_fields)
+        self.chunk_id = chunk_id
         return result
 
     def _process_partner(self, customer_data):
@@ -92,14 +123,14 @@ class ImporterSaleChannel(Component):
             return partner
 
     def _find_partner(self, customer_data):
+        channel = self.chunk_id.reference
         external_id = customer_data["external_id"]
         binding = self.env["sale.channel.partner"].search(
             [
                 ("external_id", "=", external_id),
-                ("sale_channel_id", "=", self.collection.record_id),
+                ("sale_channel_id", "=", channel.id),
             ]
         )
-        channel = self.collection.reference
         if binding:
             return binding.partner_id
         elif channel.allow_match_on_email:
@@ -110,7 +141,7 @@ class ImporterSaleChannel(Component):
                 self._binding_partner(partner, customer_data["external_id"])
                 return partner
 
-    def _prepare_partner(self, data, parent_id=None, archived=None):
+    def _prepare_partner(self, data, parent_id=None, archive_addresses=None):
         result = {
             "name": data["name"],
             "street": data.get("street"),
@@ -123,7 +154,7 @@ class ImporterSaleChannel(Component):
         }
         if parent_id:
             result["parent_id"] = parent_id
-        if archived:
+        if archive_addresses:
             result["active"] = False
         if data.get("country_code"):
             country = self.env["res.country"].search(
@@ -140,17 +171,28 @@ class ImporterSaleChannel(Component):
                 )
                 if not state:
                     raise ValidationError(
-                        _("Missing State {} for country {}").format(
-                            data["state_code"], country.name
-                        )
+                        _("Missing State %(state_code)s for country %(country_name)s")
+                        % {
+                            "state_code": data["state_code"],
+                            "country_name": country.name,
+                        }
                     )
                 result["state_id"] = state.id
         return result
 
-    def _process_addresses(self, parent, address_invoice, address_shipping):
-        vals_addr_invoice = self._prepare_partner(address_invoice, parent.id, True)
-        vals_addr_shipping = self._prepare_partner(address_shipping, parent.id, True)
-        if vals_addr_invoice == vals_addr_shipping:
+    def _should_merge_addresses(self, vals_addr_invoice, vals_addr_shipping):
+        return vals_addr_invoice == vals_addr_shipping
+
+    def _process_addresses(
+        self, parent, address_invoice, address_shipping, archive_addresses=True
+    ):
+        vals_addr_invoice = self._prepare_partner(
+            address_invoice, parent.id, archive_addresses
+        )
+        vals_addr_shipping = self._prepare_partner(
+            address_shipping, parent.id, archive_addresses
+        )
+        if self._should_merge_addresses(vals_addr_invoice, vals_addr_shipping):
             # not technically correct for the shipping addr, but this shouldn't matter
             vals_addr_invoice["type"] = "invoice"
             result = self.env["res.partner"].create(vals_addr_invoice)
@@ -167,18 +209,34 @@ class ImporterSaleChannel(Component):
         return [self._prepare_sale_line(line, sale_order) for line in data["lines"]]
 
     def _prepare_sale_line(self, line_data, sale_order):
+        channel = self.chunk_id.reference
+        company_id = channel.company_id
+
         product = self.env["product.product"].search(
-            [("default_code", "=", line_data["product_code"])]
+            [
+                ("default_code", "=", line_data["product_code"]),
+                ("product_tmpl_id.company_id", "=", company_id.id),
+            ]
         )
         if not product:
+            product = self.env["product.product"].search(
+                [
+                    ("default_code", "=", line_data["product_code"]),
+                    ("product_tmpl_id.company_id", "=", False),
+                ]
+            )
+        if not product:
             raise ValidationError(
-                _("Missing product {}").format(line_data["product_code"])
+                _(
+                    "There is no active product with the Internal Reference %(code)s "
+                    "and related to the company %(company)s."
+                )
+                % {"code": line_data["product_code"], "company": company_id.name}
             )
         elif len(product) > 1:
             raise ValidationError(
-                _("{} products found for the code {}").format(
-                    len(product), line_data["product_code"]
-                )
+                _("%(product_num)s products found for the code %(code)s.")
+                % {"product_num": len(product), "code": line_data["product_code"]}
             )
         vals = {
             "product_id": product.id,
@@ -189,7 +247,13 @@ class ImporterSaleChannel(Component):
         }
         if line_data.get("description"):
             vals["name"] = line_data["description"]
-        return self.env["sale.order.line"].play_onchanges(vals, ["product_id"])
+
+        # We need to save the queue.job.chunk before to play_onchanges
+        # otherwise it is detached from self
+        chunk_id = self.chunk_id
+        result = self.env["sale.order.line"].play_onchanges(vals, ["product_id"])
+        self.chunk_id = chunk_id
+        return result
 
     def _finalize(self, new_sale_order, raw_import_data):
         """Extend to add final operations"""
@@ -204,12 +268,10 @@ class ImporterSaleChannel(Component):
         if not data.get("payment"):
             return
         pmt_data = data["payment"]
-        acquirer = self.env["payment.acquirer"].search(
-            [("code", "=", pmt_data["mode"])]
-        )
+        acquirer = self.env["payment.acquirer"].search([("ref", "=", pmt_data["mode"])])
         if not acquirer:
             raise ValidationError(
-                _("Missing Acquirer with code {}").format(pmt_data["mode"])
+                _("Missing Acquirer_id with code {}").format(pmt_data["mode"])
             )
         if pmt_data.get("currency_code"):
             currency = self.env["res.currency"].search(
@@ -222,9 +284,13 @@ class ImporterSaleChannel(Component):
             if currency != sale_order.currency_id:
                 raise ValidationError(
                     _(
-                        "Payment currency {} differs from the "
-                        "Sale Order pricelist currency {}"
-                    ).format(currency.name, sale_order.currency_id.name)
+                        "Payment currency %(currency)s differs from the "
+                        "Sale Order pricelist currency %(pricelist_currency)s"
+                    )
+                    % {
+                        "currency": currency.name,
+                        "pricelist_currency": sale_order.currency_id.name,
+                    }
                 )
         country = (
             sale_order.partner_invoice_id.country_id.id
@@ -235,7 +301,7 @@ class ImporterSaleChannel(Component):
             "acquirer_id": acquirer.id,
             "type": "server2server",
             "state": "done",
-            "date": datetime.now(),
+            "date": fields.Datetime.now(),
             "amount": pmt_data["amount"],
             "fees": 0.00,
             "reference": pmt_data["reference"],
@@ -251,7 +317,7 @@ class ImporterSaleChannel(Component):
         self.env["sale.channel.partner"].create(
             {
                 "external_id": external_id,
-                "sale_channel_id": self.collection.record_id,
+                "sale_channel_id": self.chunk_id.reference.id,
                 "partner_id": partner.id,
             }
         )
