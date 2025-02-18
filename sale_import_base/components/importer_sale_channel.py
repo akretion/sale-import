@@ -46,11 +46,14 @@ class ImporterSaleChannel(Component):
         return self._run(self.collection.data_str)
 
     def _prepare_sale_vals(self, data):
+        channel = self.env["sale.channel"].browse(self.collection.record_id)
         partner = self._process_partner(data["address_customer"])
         address_invoice, address_shipping = self._process_addresses(
-            partner, data["address_invoicing"], data["address_shipping"]
+            partner,
+            data["address_invoicing"],
+            data["address_shipping"],
+            channel.auto_archive_addresses,
         )
-        channel = self.env["sale.channel"].browse(self.collection.record_id)
         so_vals = {
             "partner_id": partner.id,
             "partner_invoice_id": address_invoice.id,
@@ -147,9 +150,15 @@ class ImporterSaleChannel(Component):
                 result["state_id"] = state.id
         return result
 
-    def _process_addresses(self, parent, address_invoice, address_shipping):
-        vals_addr_invoice = self._prepare_partner(address_invoice, parent.id, True)
-        vals_addr_shipping = self._prepare_partner(address_shipping, parent.id, True)
+    def _process_addresses(
+        self, parent, address_invoice, address_shipping, archive_addresses=True
+    ):
+        vals_addr_invoice = self._prepare_partner(
+            address_invoice, parent.id, archive_addresses
+        )
+        vals_addr_shipping = self._prepare_partner(
+            address_shipping, parent.id, archive_addresses
+        )
         if vals_addr_invoice == vals_addr_shipping:
             # not technically correct for the shipping addr, but this shouldn't matter
             vals_addr_invoice["type"] = "invoice"

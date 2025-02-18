@@ -13,6 +13,12 @@ class SaleChannel(models.Model):
     _inherit = "sale.channel"
 
     allow_match_on_email = fields.Boolean("Allow customer match on email")
+    # default = True to be backward compatible as much as possible
+    # NOTE : in V16 or sale_import_base backport V14 from V16 this
+    # field has been renamed archive_addresses
+    auto_archive_addresses = fields.Boolean(
+        "Automatically archive partner's addresses", default=True
+    )
     sale_orders_check_amounts_untaxed = fields.Boolean(
         "(technical) Check untaxed amounts against imported values"
     )
