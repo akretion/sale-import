@@ -3,7 +3,7 @@
 {
     "name": "Sale Channel Partner",
     "summary": "Bind sale channels to contacts",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.1.0",
     "category": "Generic Modules/Sale",
     "author": "Akretion, Odoo Community Association (OCA)",
     "website": "https://github.com/akretion/sale-import",
