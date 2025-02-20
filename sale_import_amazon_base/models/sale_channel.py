@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class SaleChannel(models.Model):
@@ -12,12 +12,20 @@ class SaleChannel(models.Model):
     lwa_appid = fields.Char(string="LWA App ID")
     sp_api_refresh_token = fields.Char(string="SP-API Refresh Token")
     lwa_client_secret = fields.Char(string="LWA Client Secret")
+    is_amazon_channel = fields.Boolean(compute="_compute_is_amazon_channel")
 
     marketplace_ids = fields.Many2many(
         "amazon.marketplace",
         string="MarketPlaces",
         help="List of the MarketPlaces to be sync with Odoo through this backend app",
     )
+
+    @api.depends("channel_type")
+    def _compute_is_amazon_channel(self):
+        for rec in self:
+            rec.is_amazon_channel = rec.channel_type and rec.channel_type.startswith(
+                "amazon"
+            )
 
     @property
     def _server_env_fields(self):

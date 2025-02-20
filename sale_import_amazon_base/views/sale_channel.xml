@@ -12,7 +12,7 @@
                 <group
                     name="sale_import_amazon"
                     string="Amazon Import Parameters"
-                    invisible="1"
+                    attrs="{'invisible': [('is_amazon_channel', '=', False)]}"
                 >
                     <group name="amazon_credentials" groups="base.group_system">
                         <field name="lwa_appid" />
@@ -25,6 +25,7 @@
                             widget="many2many_tags"
                             domain="[('country_code','!=',False)]"
                         />
+                        <field name="is_amazon_channel" invisible="1" />
                     </group>
                 </group>
             </xpath>
