@@ -36,14 +36,11 @@ class SaleChannelImporterAmazon(models.TransientModel):
         address_shipping_id = self._find_partner(address_shipping)
         return address_invoice_id, address_shipping_id
 
-    def _get_line_total_incl_tax(self, item):
-        return float(item.get("netCost", {}).get("amount", 0))
-
     def _get_line_vals(self, item):
         # TODO : in case of "unitOfMeasure": "Cases" we can extract the size of the
         # packs with param "unitSize"
 
-        total_incl_tax = self._get_line_total_incl_tax(item)
+        price_unit_incl_tax = float(item.get("netCost", {}).get("amount", 0))
         qty = float(item.get("orderedQuantity", {}).get("amount", 0))
 
         line_vals = {
@@ -51,7 +48,7 @@ class SaleChannelImporterAmazon(models.TransientModel):
             "description": "ASIN: " + item["amazonProductIdentifier"],
             "qty": qty,
             # We assume the product is configured with the correct tax included in price
-            "price_unit": total_incl_tax / qty if qty else 0,
+            "price_unit": price_unit_incl_tax,
         }
 
         return line_vals
@@ -71,7 +68,6 @@ class SaleChannelImporterAmazon(models.TransientModel):
         invoicing = {**basic_addr, "external_id": details["billToParty"]["partyId"]}
 
         date_order = get_amz_date(details["purchaseOrderDate"]).strftime("%Y-%m-%d")
-        amount = sum([self._get_line_total_incl_tax(i) for i in details["items"]])
 
         formatted_data = {
             "name": raw["purchaseOrderNumber"],
@@ -80,8 +76,10 @@ class SaleChannelImporterAmazon(models.TransientModel):
             "address_shipping": shipping,
             "address_invoicing": invoicing,
             "lines": [self._get_line_vals(item) for item in details["items"]],
-            "amount": {"amount_total": amount},
         }
+
+        amount = sum(l["qty"] * l["price_unit"] for l in formatted_data["lines"])
+        formatted_data["amount"] = {"amount_total": amount}
 
         currency_code = details["items"][-1]["netCost"]["currencyCode"]
         currency_pricelist = self.chunk_id.reference.pricelist_id.currency_id.name

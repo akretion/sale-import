@@ -81,8 +81,8 @@ class TestSaleImportAmazonVendor(TransactionCase):
             order = self.env["sale.order"].search([]) - old_order_ids
 
             self.assertEqual(order.name, "712YDSMD")
-            self.assertEqual(order.amount_total, 12.5)
-            self.assertEqual(order.si_amount_total, 12.5)
+            self.assertEqual(order.amount_total, 25)
+            self.assertEqual(order.si_amount_total, 25)
             self.assertEqual(order.currency_id.name, "EUR")
             self.assertEqual(order.team_id, self.team_id)
             self.assertEqual(order.state, "draft")
@@ -90,7 +90,7 @@ class TestSaleImportAmazonVendor(TransactionCase):
 
             line = order.order_line
             self.assertEqual(line.name, "ASIN: AMZ_PROD_1")
-            self.assertEqual(line.price_unit, 6.25)
+            self.assertEqual(line.price_unit, 12.5)
             self.assertEqual(line.product_uom_qty, 2)
             self.assertEqual(line.product_id.default_code, "PROD_1")
 
