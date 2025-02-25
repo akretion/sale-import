@@ -4,6 +4,7 @@ from marshmallow_objects import ValidationError as MarshmallowValidationError
 
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
+from odoo.osv import expression
 
 
 class SaleChannelImporter(models.TransientModel):
@@ -208,27 +209,29 @@ class SaleChannelImporter(models.TransientModel):
     def _prepare_sale_line_vals(self, data, sale_order):
         return [self._prepare_sale_line(line, sale_order) for line in data["lines"]]
 
+    def _get_product_domain(self, line_data):
+        return [("default_code", "=", line_data["product_code"])]
+
     def _prepare_sale_line(self, line_data, sale_order):
         channel = self.chunk_id.reference
         company_id = channel.company_id
+        product_domain = self._get_product_domain(line_data)
 
         product = self.env["product.product"].search(
-            [
-                ("default_code", "=", line_data["product_code"]),
-                ("product_tmpl_id.company_id", "=", company_id.id),
-            ]
+            expression.AND(
+                [[("product_tmpl_id.company_id", "=", company_id.id)], product_domain]
+            )
         )
         if not product:
             product = self.env["product.product"].search(
-                [
-                    ("default_code", "=", line_data["product_code"]),
-                    ("product_tmpl_id.company_id", "=", False),
-                ]
+                expression.AND(
+                    [[("product_tmpl_id.company_id", "=", False)], product_domain]
+                )
             )
         if not product:
             raise ValidationError(
                 _(
-                    "There is no active product with the Internal Reference %(code)s "
+                    "There is no active product with the code %(code)s "
                     "and related to the company %(company)s."
                 )
                 % {"code": line_data["product_code"], "company": company_id.name}
