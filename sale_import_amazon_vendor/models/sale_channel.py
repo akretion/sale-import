@@ -45,7 +45,7 @@ class SaleChannel(models.Model):
         orders = self.amazon_vendor_import_orders()
         chunk_vals = [
             {
-                "data_str": json.dumps(order),
+                "data_str": json.dumps(order, indent=4),
                 "processor": "sale_channel_importer_amazon_vendor",
                 "model_name": "sale.channel",
                 "record_id": self.id,
