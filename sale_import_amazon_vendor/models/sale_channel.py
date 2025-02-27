@@ -52,7 +52,7 @@ class SaleChannel(models.Model):
             }
             for order in orders
         ]
-        chunk_ids = self.env["queue.job.chunk"].create(chunk_vals)
+        chunk_ids = self.env["queue.job.chunk"].sudo().create(chunk_vals)
         self.write({"date_changed_after": fields.Datetime.now()})
         return chunk_ids
 
