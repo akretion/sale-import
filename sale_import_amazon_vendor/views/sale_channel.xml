@@ -17,7 +17,8 @@
                 />
             </xpath>
             <xpath expr="//group[@name='amazon_data']" position="inside">
-                <field name="date_changed_after" />
+                <field name="date_filtering_type" />
+                <field name="date_filtering" />
             </xpath>
         </field>
     </record>
