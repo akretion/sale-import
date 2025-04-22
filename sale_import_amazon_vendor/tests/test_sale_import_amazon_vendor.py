@@ -5,7 +5,7 @@ from datetime import timedelta
 from unittest.mock import patch
 
 from odoo import fields
-from odoo.tests import TransactionCase
+from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.sale_import_amazon_vendor.tests import data
 
@@ -15,6 +15,7 @@ PATCH = (
 )
 
 
+@tagged("-at_install", "post_install")
 class TestSaleImportAmazonVendor(TransactionCase):
     def setUp(self):
         super().setUp()
