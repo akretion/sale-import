@@ -16,7 +16,7 @@ class SaleChannel(models.Model):
 
     channel_type = fields.Selection(selection_add=[("amazon_vendor", "Amazon Vendor")])
 
-    date_filtering_type = fields.Selection(
+    date_filter_type = fields.Selection(
         [
             ("createdAfter", "Date Created After"),
             ("changedAfter", "Date Changed After"),
@@ -25,7 +25,7 @@ class SaleChannel(models.Model):
         "Choose 'Date Changed After' to get orders modified since a specific date, "
         "or 'Date Created After' to get orders placed since a specific date.",
     )
-    date_filtering = fields.Datetime(
+    date_filter = fields.Datetime(
         help="The reference date used to filter Amazon orders based on the "
         "selected date filter type. Only orders created or modified after this date "
         "(depending on your selection) will be retrieved from Amazon.",
@@ -35,19 +35,19 @@ class SaleChannel(models.Model):
     def amazon_vendor_import_orders(self):
         if self.channel_type != "amazon_vendor":
             raise ValidationError(_("The sale channel must be type 'Amazon Vendor'"))
-        if not self.date_filtering_type:
+        if not self.date_filter_type:
             raise ValidationError(_("Missing Date Filtering Type"))
-        if not self.date_filtering:
+        if not self.date_filter:
             raise ValidationError(_("Missing Date Filtering"))
 
         orders = []
         creds = self.amazon_get_credentials()
-        date_filtering = self.date_filtering.isoformat(sep="T")
+        date_filter = self.date_filter.isoformat(sep="T")
 
         for marketplace_id in self.marketplace_ids:
             country_code = marketplace_id.country_code
             pages = load_purchase_order_pages(
-                creds, country_code, self.date_filtering_type, date_filtering
+                creds, country_code, self.date_filter_type, date_filter
             )
             for page in pages:
                 orders.extend([order for order in page.payload.get("orders")])
@@ -67,7 +67,7 @@ class SaleChannel(models.Model):
             for order in orders
         ]
         chunk_ids = self.env["queue.job.chunk"].sudo().create(chunk_vals)
-        self.write({"date_filtering": fields.Datetime.now()})
+        self.write({"date_filter": fields.Datetime.now()})
         return chunk_ids
 
     def amazon_vendor_import_orders_chunk_cron(self):

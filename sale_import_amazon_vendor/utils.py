@@ -7,11 +7,11 @@ from sp_api.util import load_all_pages, throttle_retry
 @throttle_retry()
 @load_all_pages()
 def load_purchase_order_pages(
-    credentials, country_code, date_filtering_type, date_filtering, **kwargs
+    credentials, country_code, date_filter_type, date_filter, **kwargs
 ):
     """
     A generator function to return a list of Amazon Purchase Orders, grouped by pages
-    and filtered by  `date_filtering_type`.
+    and filtered by  `date_filter_type`.
 
     Using python-amazon-sp-api tools.
     """
@@ -20,7 +20,7 @@ def load_purchase_order_pages(
     return VendorOrders(
         credentials=credentials, marketplace=marketplace
     ).get_purchase_orders(
-        **{date_filtering_type: date_filtering}, includeDetails="true", **kwargs
+        **{date_filter_type: date_filter}, includeDetails="true", **kwargs
     )
 
 
