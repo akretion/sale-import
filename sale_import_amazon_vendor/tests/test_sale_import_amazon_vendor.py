@@ -5,7 +5,7 @@ from datetime import timedelta
 from unittest.mock import patch
 
 from odoo import fields
-from odoo.tests import TransactionCase
+from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.sale_import_amazon_vendor.tests import data
 
@@ -15,6 +15,7 @@ PATCH = (
 )
 
 
+@tagged("-at_install", "post_install")
 class TestSaleImportAmazonVendor(TransactionCase):
     def setUp(self):
         super().setUp()
@@ -47,7 +48,8 @@ class TestSaleImportAmazonVendor(TransactionCase):
                 "name": "Amazon",
                 "channel_type": "amazon_vendor",
                 "marketplace_ids": [(6, 0, [self.marketplace_id.id])],
-                "date_changed_after": fields.Datetime.now() - timedelta(days=2),
+                "date_filter_type": "changedAfter",
+                "date_filter": fields.Datetime.now() - timedelta(days=2),
                 "crm_team_id": self.team_id.id,
                 "sale_orders_check_amounts_total": True,
                 "confirm_order": False,
