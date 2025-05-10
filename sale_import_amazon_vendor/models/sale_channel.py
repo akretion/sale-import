@@ -36,9 +36,9 @@ class SaleChannel(models.Model):
         if self.channel_type != "amazon_vendor":
             raise ValidationError(_("The sale channel must be type 'Amazon Vendor'"))
         if not self.date_filter_type:
-            raise ValidationError(_("Missing Date Filtering Type"))
+            raise ValidationError(_("Missing Date Filter Type"))
         if not self.date_filter:
-            raise ValidationError(_("Missing Date Filtering"))
+            raise ValidationError(_("Missing Date Filter"))
 
         orders = []
         creds = self.amazon_get_credentials()
