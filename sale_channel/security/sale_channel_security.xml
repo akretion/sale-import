@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- multicomp rule -->
+    <record model="ir.rule" id="sale_channel_comp_rule">
+        <field name="name">Sale Channel multi-company</field>
+        <field name="model_id" ref="model_sale_channel" />
+        <field
+            name="domain_force"
+        >['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>
